@@ -1,0 +1,20 @@
+{
+  "maseter_setting": {
+    "Mail_Server": {
+      "EMAIL_MAILER": " smtp",
+      "EMAIL_HOST": " mailpit",
+      "EMAIL_PORT": 1025,
+      "EMAIL_USERNAME": " null",
+      "EMAIL_PASSWORD": " null",
+      "EMAIL_ENCRYPTION": " null",
+      "EMAIL_FROM_ADDRESS": "",
+      "EMAIL_FROM_NAME": " Neo-cloud-pro",
+      "APP_NAME": " Neo-cloud-pro"
+    },
+    "Twilio": {
+      "TWILIO_ACCOUNT_SID": " null",
+      "TWILIO_AUTH_TOKEN": " null",
+      "TWILIO_PHONE_NUMBER": " null"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "Super Admin",
+    "email": "dkido913@gmail.com",
+    "role": "oracle",
+    "otp": "",
+    "otpExpiry": "",
+    "APIKey": "dki",
+    "uuid": "",
+    "jwt": "",
+    "emailVerified": true,
+    "createdAt": "2023-10-01T12:00:00Z",
+    "updatedAt": "2023-10-01T12:00:00Z"
+  }
+]
