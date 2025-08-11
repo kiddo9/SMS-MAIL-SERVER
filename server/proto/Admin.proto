@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package admin;
+
+option go_package = "github.com/kiddo9/SMS-MAIL-SERVER/proto";
+
+
+message Admin {
+    int64 id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message GetAndValidateAdminRequest {
+    int64 uuid = 1;
+}
+
+message AllAdmins {
+    
+}
+
+service AdminService{
+    rpc GetAdmin(GetAndValidateAdminRequest) returns (Admin) {}
+    rpc AllAdmin(AllAdmins) returns (stream Admin) {}
+}
