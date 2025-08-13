@@ -3,6 +3,7 @@ module github.com/kiddo9/SMS-MAIL-SERVER
 go 1.23.3
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect

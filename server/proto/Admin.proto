@@ -2,24 +2,102 @@ syntax = "proto3";
 
 package admin;
 
-option go_package = "github.com/kiddo9/SMS-MAIL-SERVER/proto";
+option go_package = "message/proto";
 
 
 message Admin {
-    int64 id = 1;
-    string name = 2;
-    string email = 3;
+    string name = 1;
+    string email = 2;
+    string role = 3;
+    string phone = 4;
+    int64 otp = 5;
+    double otpExpiry = 6; // Unix timestamp in seconds
+    string APIKey = 7;
+    string uuid = 8; // Unique identifier for the admin
+    string jwt = 9; // JWT token for authentication
+    bool emailVerified = 10; // Indicates if the email is verified
+    string createdAt = 11; // Timestamp of when the admin was created
+    string updatedAt = 12; // Timestamp of when the admin was last updated
+}
+
+message CreateAdminUserRequest {
+    string recaptchaToken = 1; // Recaptcha token for validation
+    Admin admin = 2; // Admin details to be created 
+}
+
+message CreateAdminUserResponse {
+    bool adminCreated = 1; // Created admin details
+    string message = 2; // Message regarding the creation status
 }
 
 message GetAndValidateAdminRequest {
-    int64 uuid = 1;
+    string email = 1; // Email of the admin to be validated
+}
+
+message ValidateAdminResponse {
+    bool isValid = 1; // Indicates if the admin is valid
+    Admin admin = 2; // Admin details if valid
+    bool isEmailVerified = 3; // Indicates if the email is verified
+    string message = 4; // Message regarding the validation status
 }
 
 message AllAdmins {
-    
+    // This message can be empty, used to fetch all admins
+}
+
+message OtpRequest {
+    string email = 1; // Email of the admin to send OTP
+}
+
+message OtpResponse {
+    bool otpSent = 1; // Indicates if the OTP was sent successfully
+    string message = 2; // Message regarding the OTP status
+}
+
+message OtpVerificationRequest {
+    string email = 1; // Email of the admin for OTP verification
+    int64 otp = 2; // OTP to verify
+}
+
+message OtpVerificationResponse {
+    bool isVerified = 1; // Indicates if the OTP verification was successful
+    string message = 2; // Message regarding the verification status
+}
+
+message GetASpecificAdminRequest {
+    string uuid = 1; // Unique identifier of the admin to fetch
+}
+
+message GetASpecificAdminResponse {
+    Admin admin = 1; // Admin details if found
+}
+
+message AdminUpdateRequest {
+    Admin admin = 1; // Admin details to be updated
+}
+
+message AdminUpdateResponse {
+    bool isUpdated = 1; // Indicates if the admin was updated successfully
+    string message = 2; // Message regarding the update status
+}
+
+message DeleteAdminRequest {
+    string uuid = 1; // Unique identifier of the admin to delete
+}
+
+message DeleteAdminResponse {
+    bool isDeleted = 1; // Indicates if the admin was deleted successfully
+    string message = 2; // Message regarding the deletion status
 }
 
 service AdminService{
-    rpc GetAdmin(GetAndValidateAdminRequest) returns (Admin) {}
-    rpc AllAdmin(AllAdmins) returns (stream Admin) {}
+   rpc CreateAdmin(CreateAdminUserRequest) returns (CreateAdminUserResponse) {}
+   rpc GetAllAdmins(AllAdmins) returns (stream Admin) {}
+   rpc ValidateAdmin(GetAndValidateAdminRequest) returns (ValidateAdminResponse) {}
+   rpc SendOtp(OtpRequest) returns (OtpResponse) {}
+   rpc VerifyOtp(OtpVerificationRequest) returns (OtpVerificationResponse) {}
+   rpc LoginAdmin(OtpRequest) returns (OtpResponse) {}
+   rpc GetSpecificAdmin(GetASpecificAdminRequest) returns (GetASpecificAdminResponse){}
+   rpc UpdateAdmin(AdminUpdateRequest) returns (AdminUpdateResponse) {}
+   rpc DeleteAdmin(DeleteAdminRequest) returns (DeleteAdminResponse) {}
 }
