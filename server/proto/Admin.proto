@@ -90,6 +90,15 @@ message DeleteAdminResponse {
     string message = 2; // Message regarding the deletion status
 }
 
+message TokenValidationRequest {
+    string token = 1; // JWT token to validate
+}
+
+message TokenValidationResponse {
+    bool isValid = 1; // Indicates if the token is valid
+    string email = 2; // Message regarding the token validation status
+}
+
 service AdminService{
    rpc CreateAdmin(CreateAdminUserRequest) returns (CreateAdminUserResponse) {}
    rpc GetAllAdmins(AllAdmins) returns (stream Admin) {}
@@ -100,4 +109,5 @@ service AdminService{
    rpc GetSpecificAdmin(GetASpecificAdminRequest) returns (GetASpecificAdminResponse){}
    rpc UpdateAdmin(AdminUpdateRequest) returns (AdminUpdateResponse) {}
    rpc DeleteAdmin(DeleteAdminRequest) returns (DeleteAdminResponse) {}
+   rpc ValidateToken(TokenValidationRequest) returns (TokenValidationResponse) {}
 }

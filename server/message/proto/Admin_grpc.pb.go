@@ -28,6 +28,7 @@ const (
 	AdminService_GetSpecificAdmin_FullMethodName = "/admin.AdminService/GetSpecificAdmin"
 	AdminService_UpdateAdmin_FullMethodName      = "/admin.AdminService/UpdateAdmin"
 	AdminService_DeleteAdmin_FullMethodName      = "/admin.AdminService/DeleteAdmin"
+	AdminService_ValidateToken_FullMethodName    = "/admin.AdminService/ValidateToken"
 )
 
 // AdminServiceClient is the client API for AdminService service.
@@ -43,6 +44,7 @@ type AdminServiceClient interface {
 	GetSpecificAdmin(ctx context.Context, in *GetASpecificAdminRequest, opts ...grpc.CallOption) (*GetASpecificAdminResponse, error)
 	UpdateAdmin(ctx context.Context, in *AdminUpdateRequest, opts ...grpc.CallOption) (*AdminUpdateResponse, error)
 	DeleteAdmin(ctx context.Context, in *DeleteAdminRequest, opts ...grpc.CallOption) (*DeleteAdminResponse, error)
+	ValidateToken(ctx context.Context, in *TokenValidationRequest, opts ...grpc.CallOption) (*TokenValidationResponse, error)
 }
 
 type adminServiceClient struct {
@@ -152,6 +154,16 @@ func (c *adminServiceClient) DeleteAdmin(ctx context.Context, in *DeleteAdminReq
 	return out, nil
 }
 
+func (c *adminServiceClient) ValidateToken(ctx context.Context, in *TokenValidationRequest, opts ...grpc.CallOption) (*TokenValidationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TokenValidationResponse)
+	err := c.cc.Invoke(ctx, AdminService_ValidateToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServiceServer is the server API for AdminService service.
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility.
@@ -165,6 +177,7 @@ type AdminServiceServer interface {
 	GetSpecificAdmin(context.Context, *GetASpecificAdminRequest) (*GetASpecificAdminResponse, error)
 	UpdateAdmin(context.Context, *AdminUpdateRequest) (*AdminUpdateResponse, error)
 	DeleteAdmin(context.Context, *DeleteAdminRequest) (*DeleteAdminResponse, error)
+	ValidateToken(context.Context, *TokenValidationRequest) (*TokenValidationResponse, error)
 	mustEmbedUnimplementedAdminServiceServer()
 }
 
@@ -201,6 +214,9 @@ func (UnimplementedAdminServiceServer) UpdateAdmin(context.Context, *AdminUpdate
 }
 func (UnimplementedAdminServiceServer) DeleteAdmin(context.Context, *DeleteAdminRequest) (*DeleteAdminResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAdmin not implemented")
+}
+func (UnimplementedAdminServiceServer) ValidateToken(context.Context, *TokenValidationRequest) (*TokenValidationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateToken not implemented")
 }
 func (UnimplementedAdminServiceServer) mustEmbedUnimplementedAdminServiceServer() {}
 func (UnimplementedAdminServiceServer) testEmbeddedByValue()                      {}
@@ -378,6 +394,24 @@ func _AdminService_DeleteAdmin_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminService_ValidateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenValidationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ValidateToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ValidateToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ValidateToken(ctx, req.(*TokenValidationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminService_ServiceDesc is the grpc.ServiceDesc for AdminService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -416,6 +450,10 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAdmin",
 			Handler:    _AdminService_DeleteAdmin_Handler,
+		},
+		{
+			MethodName: "ValidateToken",
+			Handler:    _AdminService_ValidateToken_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

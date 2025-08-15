@@ -885,6 +885,102 @@ func (x *DeleteAdminResponse) GetMessage() string {
 	return ""
 }
 
+type TokenValidationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"` // JWT token to validate
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TokenValidationRequest) Reset() {
+	*x = TokenValidationRequest{}
+	mi := &file_proto_Admin_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TokenValidationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TokenValidationRequest) ProtoMessage() {}
+
+func (x *TokenValidationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_Admin_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TokenValidationRequest.ProtoReflect.Descriptor instead.
+func (*TokenValidationRequest) Descriptor() ([]byte, []int) {
+	return file_proto_Admin_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *TokenValidationRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+type TokenValidationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsValid       bool                   `protobuf:"varint,1,opt,name=isValid,proto3" json:"isValid,omitempty"` // Indicates if the token is valid
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`      // Message regarding the token validation status
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TokenValidationResponse) Reset() {
+	*x = TokenValidationResponse{}
+	mi := &file_proto_Admin_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TokenValidationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TokenValidationResponse) ProtoMessage() {}
+
+func (x *TokenValidationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_Admin_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TokenValidationResponse.ProtoReflect.Descriptor instead.
+func (*TokenValidationResponse) Descriptor() ([]byte, []int) {
+	return file_proto_Admin_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *TokenValidationResponse) GetIsValid() bool {
+	if x != nil {
+		return x.IsValid
+	}
+	return false
+}
+
+func (x *TokenValidationResponse) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
 var File_proto_Admin_proto protoreflect.FileDescriptor
 
 const file_proto_Admin_proto_rawDesc = "" +
@@ -945,7 +1041,12 @@ const file_proto_Admin_proto_rawDesc = "" +
 	"\x04uuid\x18\x01 \x01(\tR\x04uuid\"M\n" +
 	"\x13DeleteAdminResponse\x12\x1c\n" +
 	"\tisDeleted\x18\x01 \x01(\bR\tisDeleted\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\x88\x05\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\".\n" +
+	"\x16TokenValidationRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"I\n" +
+	"\x17TokenValidationResponse\x12\x18\n" +
+	"\aisValid\x18\x01 \x01(\bR\aisValid\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email2\xda\x05\n" +
 	"\fAdminService\x12N\n" +
 	"\vCreateAdmin\x12\x1d.admin.CreateAdminUserRequest\x1a\x1e.admin.CreateAdminUserResponse\"\x00\x122\n" +
 	"\fGetAllAdmins\x12\x10.admin.AllAdmins\x1a\f.admin.Admin\"\x000\x01\x12R\n" +
@@ -956,7 +1057,8 @@ const file_proto_Admin_proto_rawDesc = "" +
 	"LoginAdmin\x12\x11.admin.OtpRequest\x1a\x12.admin.OtpResponse\"\x00\x12W\n" +
 	"\x10GetSpecificAdmin\x12\x1f.admin.GetASpecificAdminRequest\x1a .admin.GetASpecificAdminResponse\"\x00\x12F\n" +
 	"\vUpdateAdmin\x12\x19.admin.AdminUpdateRequest\x1a\x1a.admin.AdminUpdateResponse\"\x00\x12F\n" +
-	"\vDeleteAdmin\x12\x19.admin.DeleteAdminRequest\x1a\x1a.admin.DeleteAdminResponse\"\x00B\x0fZ\rmessage/protob\x06proto3"
+	"\vDeleteAdmin\x12\x19.admin.DeleteAdminRequest\x1a\x1a.admin.DeleteAdminResponse\"\x00\x12P\n" +
+	"\rValidateToken\x12\x1d.admin.TokenValidationRequest\x1a\x1e.admin.TokenValidationResponse\"\x00B\x0fZ\rmessage/protob\x06proto3"
 
 var (
 	file_proto_Admin_proto_rawDescOnce sync.Once
@@ -970,7 +1072,7 @@ func file_proto_Admin_proto_rawDescGZIP() []byte {
 	return file_proto_Admin_proto_rawDescData
 }
 
-var file_proto_Admin_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_proto_Admin_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_proto_Admin_proto_goTypes = []any{
 	(*Admin)(nil),                      // 0: admin.Admin
 	(*CreateAdminUserRequest)(nil),     // 1: admin.CreateAdminUserRequest
@@ -988,6 +1090,8 @@ var file_proto_Admin_proto_goTypes = []any{
 	(*AdminUpdateResponse)(nil),        // 13: admin.AdminUpdateResponse
 	(*DeleteAdminRequest)(nil),         // 14: admin.DeleteAdminRequest
 	(*DeleteAdminResponse)(nil),        // 15: admin.DeleteAdminResponse
+	(*TokenValidationRequest)(nil),     // 16: admin.TokenValidationRequest
+	(*TokenValidationResponse)(nil),    // 17: admin.TokenValidationResponse
 }
 var file_proto_Admin_proto_depIdxs = []int32{
 	0,  // 0: admin.CreateAdminUserRequest.admin:type_name -> admin.Admin
@@ -1003,17 +1107,19 @@ var file_proto_Admin_proto_depIdxs = []int32{
 	10, // 10: admin.AdminService.GetSpecificAdmin:input_type -> admin.GetASpecificAdminRequest
 	12, // 11: admin.AdminService.UpdateAdmin:input_type -> admin.AdminUpdateRequest
 	14, // 12: admin.AdminService.DeleteAdmin:input_type -> admin.DeleteAdminRequest
-	2,  // 13: admin.AdminService.CreateAdmin:output_type -> admin.CreateAdminUserResponse
-	0,  // 14: admin.AdminService.GetAllAdmins:output_type -> admin.Admin
-	4,  // 15: admin.AdminService.ValidateAdmin:output_type -> admin.ValidateAdminResponse
-	7,  // 16: admin.AdminService.SendOtp:output_type -> admin.OtpResponse
-	9,  // 17: admin.AdminService.VerifyOtp:output_type -> admin.OtpVerificationResponse
-	7,  // 18: admin.AdminService.LoginAdmin:output_type -> admin.OtpResponse
-	11, // 19: admin.AdminService.GetSpecificAdmin:output_type -> admin.GetASpecificAdminResponse
-	13, // 20: admin.AdminService.UpdateAdmin:output_type -> admin.AdminUpdateResponse
-	15, // 21: admin.AdminService.DeleteAdmin:output_type -> admin.DeleteAdminResponse
-	13, // [13:22] is the sub-list for method output_type
-	4,  // [4:13] is the sub-list for method input_type
+	16, // 13: admin.AdminService.ValidateToken:input_type -> admin.TokenValidationRequest
+	2,  // 14: admin.AdminService.CreateAdmin:output_type -> admin.CreateAdminUserResponse
+	0,  // 15: admin.AdminService.GetAllAdmins:output_type -> admin.Admin
+	4,  // 16: admin.AdminService.ValidateAdmin:output_type -> admin.ValidateAdminResponse
+	7,  // 17: admin.AdminService.SendOtp:output_type -> admin.OtpResponse
+	9,  // 18: admin.AdminService.VerifyOtp:output_type -> admin.OtpVerificationResponse
+	7,  // 19: admin.AdminService.LoginAdmin:output_type -> admin.OtpResponse
+	11, // 20: admin.AdminService.GetSpecificAdmin:output_type -> admin.GetASpecificAdminResponse
+	13, // 21: admin.AdminService.UpdateAdmin:output_type -> admin.AdminUpdateResponse
+	15, // 22: admin.AdminService.DeleteAdmin:output_type -> admin.DeleteAdminResponse
+	17, // 23: admin.AdminService.ValidateToken:output_type -> admin.TokenValidationResponse
+	14, // [14:24] is the sub-list for method output_type
+	4,  // [4:14] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
 	4,  // [4:4] is the sub-list for extension extendee
 	0,  // [0:4] is the sub-list for field type_name
@@ -1030,7 +1136,7 @@ func file_proto_Admin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_Admin_proto_rawDesc), len(file_proto_Admin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

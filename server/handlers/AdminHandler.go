@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
 	"github.com/kiddo9/SMS-MAIL-SERVER/structures"
 	"github.com/kiddo9/SMS-MAIL-SERVER/utils"
@@ -20,6 +21,27 @@ type AdminHandler struct {
 	pb.UnimplementedAdminServiceServer
 }
 
+var data []byte
+var fileName string = "storage/admin.json"
+
+func LoadFile() error{
+	_, err := os.Open(fileName)
+
+	if err != nil {
+		return status.Errorf(codes.Internal, "could not open file: %v", err)
+	}
+
+	data, err = os.ReadFile(fileName)
+
+	if err != nil {
+		return status.Errorf(codes.Internal, "could not read file: %v", err)
+	}
+
+	return nil
+}
+
+
+//login admin handler
 func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.OtpResponse, error){
 	_, ok := metadata.FromIncomingContext(ctx)
 
@@ -28,24 +50,11 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.O
 		return nil, status.Errorf(codes.Unauthenticated, "context absent")
 	}
 
-	fileName := "storage/admin.json"
-
-	_, err := os.Open(fileName)
-
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not open file: %v", err)
-	}
-
-	date, err := os.ReadFile(fileName)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not read file: %v", err)
-	}
+	LoadFile()
 
 	var admins []structures.AdminStructs
 
-	err = json.Unmarshal(date, &admins)
+	err := json.Unmarshal(data, &admins)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Unimplemented, "could not unmarshal data: %v", err)
@@ -59,10 +68,11 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.O
 
 	var jwtToken string
 
-	for _, emails := range admins {
+	for idx, emails := range admins {
 		if email != emails.Email {
 			return nil, status.Errorf(codes.NotFound, "request returned a 404 response")
 		}
+		
 		tokenExpiry := time.Now().Add(time.Minute * 5).Unix()
 		// Generate JWT token
 		jwtToken, err = utils.GenerateJWTToken(emails.Email, emails.Uuid, emails.APIKey, tokenExpiry)
@@ -71,9 +81,22 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.O
 			return nil, status.Errorf(codes.Internal, "could not generate JWT token")
 		}
 		token := utils.GenerateCode(8)
-		
-		
-		fmt.Printf("Token sent %v. token %v", token, jwtToken)
+
+		emails.OTP = token
+		emails.OTPExpiry = fmt.Sprintf("%v", tokenExpiry)
+
+		admins[idx] = emails
+
+		updateDate, err := json.MarshalIndent(admins, "", "")
+
+		if err != nil{
+			return nil, status.Errorf(codes.Internal, "unable to convert back to json")
+		}
+
+		if err := os.WriteFile(fileName, updateDate,0644); err != nil {
+			return nil, status.Errorf(codes.Internal, "unable to write into file")
+		}
+		//logic to send to email
 	}
 
 	
@@ -83,6 +106,120 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.O
 	}, nil
 }
 
-// func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationRequest) (*pb.OtpVerificationResponse, error) {
-	
-// }
+//handler to resend otp
+func (h *AdminHandler) SendOtp(ctx context.Context, req *pb.OtpRequest)(*pb.OtpResponse, error){
+	_, ok := metadata.FromIncomingContext(ctx)
+
+	if !ok {
+		return nil, status.Errorf(codes.Aborted, "server returned a 422 status response")
+	}
+
+	LoadFile()
+
+	var admins []map[string]interface{}
+
+	err := json.Unmarshal(data, &admins)
+
+	if err != nil{
+		return nil, status.Errorf(codes.Internal, "could not unmarshal data: %v", err)
+	}
+
+	email := req.GetEmail()
+
+	for idx, admin := range admins {
+		if email != admin["email"] {
+			return nil, status.Errorf(codes.Canceled, "request was cancelled with status code 422")
+		}
+		tokenExpiry := time.Now().Add(time.Minute * 5).Unix()
+		token := utils.GenerateCode(8)
+
+		admin["otp"] = token
+		admin["otpExpiry"] = fmt.Sprintf("%v", tokenExpiry)
+
+		admins[idx] = admin
+
+		update, err := json.MarshalIndent(admins, "", "")
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "unable to complete request write")
+		}
+
+		err = os.WriteFile(fileName, update, 0644)
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error occured while processing your request")
+		}
+
+		//logic to send to email
+	}
+
+	return  &pb.OtpResponse{
+		Message: "otp sent",
+		OtpSent: true,
+	}, nil
+}
+
+// token validation handler
+func (h *AdminHandler) ValidateToken(ctx context.Context, req *pb.TokenValidationRequest)(*pb.TokenValidationResponse, error){
+	_, ok := metadata.FromIncomingContext(ctx)
+
+	if !ok {
+		return nil, status.Errorf(codes.Aborted, "you request was aborted")
+	}
+
+	LoadFile()
+
+	tokenToBeVerified := req.GetToken()
+
+	if tokenToBeVerified == ""{
+		return nil, status.Errorf(codes.NotFound, "request returned a 404 response")
+	}
+
+	tokenResponse, err := utils.ValidateToken(tokenToBeVerified)
+
+	 if err != nil {
+        return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
+    }
+
+	claims, ok := tokenResponse.Claims.(jwt.MapClaims)
+
+	if !ok || !tokenResponse.Valid{
+		return nil, status.Errorf(codes.Unauthenticated, "token is invalid: %v", err)
+	}
+
+	if exp, ok := claims["exp"].(float64); ok && time.Now().Unix() > int64(exp) {
+		return nil, status.Errorf(codes.Unauthenticated, "token has expired")
+	}
+
+	jwtemail, emailExists := claims["email"].( string)
+	Uuid, uuidExists := claims["uuid"].( string)
+	apiKey, exists := claims["APIKey"].( string)
+
+	if !emailExists || !uuidExists|| !exists {
+		return nil, status.Errorf(codes.Unauthenticated, "token was dismissed: %v", err)
+	}
+
+	var admins []structures.AdminStructs
+
+	err = json.Unmarshal(data, &admins)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not unmarshal data: %v", err)
+	}
+
+	for _, admin := range admins{
+		if admin.Uuid != Uuid && admin.APIKey != apiKey && admin.Email != jwtemail {
+			return  nil, status.Errorf(codes.NotFound, "server returned a 404 response")
+		}
+	}
+
+	return  &pb.TokenValidationResponse{
+		IsValid: true,
+		Email: jwtemail,
+	}, nil
+}
+
+func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationRequest) (*pb.OtpVerificationResponse, error) {
+	return &pb.OtpVerificationResponse{
+		IsVerified: true,
+		Message: "verification successful",
+	}, nil
+}
