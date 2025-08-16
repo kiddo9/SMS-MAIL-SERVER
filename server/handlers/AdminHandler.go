@@ -218,8 +218,96 @@ func (h *AdminHandler) ValidateToken(ctx context.Context, req *pb.TokenValidatio
 }
 
 func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationRequest) (*pb.OtpVerificationResponse, error) {
+	LoadFile()
+
+	email := req.GetEmail()
+	otp := req.GetOtp()
+
+	if email == "" || otp == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "server returned a 400 response")
+	}
+
+	var admins []structures.AdminStructs
+
+	err := json.Unmarshal(data, &admins)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "could not unmarshal data: %v", err)
+	}
+
+	var loginRequestToken string
+
+	for _, admin := range admins{
+		if email != admin.Email {
+			return  nil, status.Errorf(codes.NotFound, "server returned a 404 response")
+		}
+
+		user := map[string]interface{}{
+			"email": admin.Email,
+			"uuid":  admin.Uuid,
+			"apiKey": admin.APIKey,
+			"otp":   admin.OTP,
+			"otpExpiry": admin.OTPExpiry,
+			"jwt": admin.Jwt,
+		}
+
+		if otp != user["otp"]{
+			return nil, status.Errorf(codes.PermissionDenied, "invalid otp provided")
+		}
+
+		otpExpiry :=  user["otpExpiry"].(float64)
+
+		if time.Now().Unix() > int64(otpExpiry){
+			return nil, status.Errorf(codes.PermissionDenied, "otp has expired")
+		}
+
+		validateLongTermToken, err := utils.ValidateToken(user["jwt"].(string))
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "invalid long term token: %v", err)
+		}
+
+		infoData, ok := validateLongTermToken.Claims.(jwt.MapClaims)
+		if !ok || !validateLongTermToken.Valid {
+			return nil, status.Errorf(codes.Unauthenticated, "invalid long term token")
+		}
+		if time.Now().Unix() > int64(infoData["exp"].(float64)) {
+			// Generate a new long-term token if the existing one has expired
+			newLongTermToken, err := utils.GenerateJWTTokenLongTerm(
+				infoData["email"].(string),
+				infoData["uuid"].(string),
+				infoData["APIKey"].(string),
+			)
+
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "could not generate new long term token: %v", err)
+			}
+
+			user["jwt"] = newLongTermToken
+
+			// Update the admin data with the new long-term token
+			admin.Jwt = newLongTermToken
+
+			// Save the updated admin data back to the file
+			updateData, err := json.MarshalIndent(admins, "", "")
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "could not marshal updated admin data: %v", err)
+			}
+
+			if err := os.WriteFile(fileName, updateData, 0644); err != nil {
+				return nil, status.Errorf(codes.Internal, "could not write updated admin data to file: %v", err)
+			}
+		} 
+		// generate login request token
+	 	loginRequestToken, err = utils.GenerateRequestJWTToken(user["uuid"].(string), user["apiKey"].(string))
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "could not generate login request token: %v", err)
+		}
+	}
+
+	fmt.Print(loginRequestToken)
+
 	return &pb.OtpVerificationResponse{
 		IsVerified: true,
-		Message: "verification successful",
+		Message: loginRequestToken,
 	}, nil
 }

@@ -56,7 +56,7 @@ message OtpResponse {
 
 message OtpVerificationRequest {
     string email = 1; // Email of the admin for OTP verification
-    int64 otp = 2; // OTP to verify
+    string otp = 2; // OTP to verify
 }
 
 message OtpVerificationResponse {
