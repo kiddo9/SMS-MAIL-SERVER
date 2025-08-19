@@ -15,13 +15,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler)(interface{}, error){
+func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	skipAuth := map[string]bool{
-		"/message.proto.AdminService/LoginAdmin": true,
+		"/message.proto.AdminService/LoginAdmin":    true,
 		"/message.proto.AdminService/ValidateToken": true,
 	}
 
-	if skipAuth[info.FullMethod]{
+	if skipAuth[info.FullMethod] {
 		return handler(ctx, req)
 	}
 
@@ -44,7 +44,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 	}
 
 	details, ok := decerptedToken.Claims.(jwt.MapClaims)
-	if !ok || decerptedToken.Valid {
+	if !ok || !decerptedToken.Valid {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid request")
 	}
 
@@ -111,7 +111,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 			break
 		}
 	}
-	
+
 	return handler(ctx, req)
 
 }
