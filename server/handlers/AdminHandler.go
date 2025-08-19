@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -24,7 +25,7 @@ type AdminHandler struct {
 var data []byte
 var fileName string = "storage/admin.json"
 
-func LoadFile() error{
+func LoadFile() error {
 	_, err := os.Open(fileName)
 
 	if err != nil {
@@ -40,9 +41,8 @@ func LoadFile() error{
 	return nil
 }
 
-
-//login admin handler
-func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.OtpResponse, error){
+// login admin handler
+func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest) (*pb.OtpResponse, error) {
 	_, ok := metadata.FromIncomingContext(ctx)
 
 	if !ok {
@@ -72,7 +72,7 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.O
 		if email != emails.Email {
 			return nil, status.Errorf(codes.NotFound, "request returned a 404 response")
 		}
-		
+
 		tokenExpiry := time.Now().Add(time.Minute * 5).Unix()
 		// Generate JWT token
 		jwtToken, err = utils.GenerateJWTToken(emails.Email, emails.Uuid, emails.APIKey, tokenExpiry)
@@ -89,25 +89,24 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest)(*pb.O
 
 		updateDate, err := json.MarshalIndent(admins, "", "")
 
-		if err != nil{
+		if err != nil {
 			return nil, status.Errorf(codes.Internal, "unable to convert back to json")
 		}
 
-		if err := os.WriteFile(fileName, updateDate,0644); err != nil {
+		if err := os.WriteFile(fileName, updateDate, 0644); err != nil {
 			return nil, status.Errorf(codes.Internal, "unable to write into file")
 		}
 		//logic to send to email
 	}
 
-	
 	return &pb.OtpResponse{
 		Message: jwtToken,
 		OtpSent: true,
 	}, nil
 }
 
-//handler to resend otp
-func (h *AdminHandler) SendOtp(ctx context.Context, req *pb.OtpRequest)(*pb.OtpResponse, error){
+// handler to resend otp
+func (h *AdminHandler) SendOtp(ctx context.Context, req *pb.OtpRequest) (*pb.OtpResponse, error) {
 	_, ok := metadata.FromIncomingContext(ctx)
 
 	if !ok {
@@ -120,7 +119,7 @@ func (h *AdminHandler) SendOtp(ctx context.Context, req *pb.OtpRequest)(*pb.OtpR
 
 	err := json.Unmarshal(data, &admins)
 
-	if err != nil{
+	if err != nil {
 		return nil, status.Errorf(codes.Internal, "could not unmarshal data: %v", err)
 	}
 
@@ -152,14 +151,14 @@ func (h *AdminHandler) SendOtp(ctx context.Context, req *pb.OtpRequest)(*pb.OtpR
 		//logic to send to email
 	}
 
-	return  &pb.OtpResponse{
+	return &pb.OtpResponse{
 		Message: "otp sent",
 		OtpSent: true,
 	}, nil
 }
 
 // token validation handler
-func (h *AdminHandler) ValidateToken(ctx context.Context, req *pb.TokenValidationRequest)(*pb.TokenValidationResponse, error){
+func (h *AdminHandler) ValidateToken(ctx context.Context, req *pb.TokenValidationRequest) (*pb.TokenValidationResponse, error) {
 	_, ok := metadata.FromIncomingContext(ctx)
 
 	if !ok {
@@ -170,19 +169,19 @@ func (h *AdminHandler) ValidateToken(ctx context.Context, req *pb.TokenValidatio
 
 	tokenToBeVerified := req.GetToken()
 
-	if tokenToBeVerified == ""{
+	if tokenToBeVerified == "" {
 		return nil, status.Errorf(codes.NotFound, "request returned a 404 response")
 	}
 
 	tokenResponse, err := utils.ValidateToken(tokenToBeVerified)
 
-	 if err != nil {
-        return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
-    }
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
+	}
 
 	claims, ok := tokenResponse.Claims.(jwt.MapClaims)
 
-	if !ok || !tokenResponse.Valid{
+	if !ok || !tokenResponse.Valid {
 		return nil, status.Errorf(codes.Unauthenticated, "token is invalid: %v", err)
 	}
 
@@ -190,11 +189,11 @@ func (h *AdminHandler) ValidateToken(ctx context.Context, req *pb.TokenValidatio
 		return nil, status.Errorf(codes.Unauthenticated, "token has expired")
 	}
 
-	jwtemail, emailExists := claims["email"].( string)
-	Uuid, uuidExists := claims["uuid"].( string)
-	apiKey, exists := claims["APIKey"].( string)
+	jwtemail, emailExists := claims["email"].(string)
+	Uuid, uuidExists := claims["uuid"].(string)
+	apiKey, exists := claims["APIKey"].(string)
 
-	if !emailExists || !uuidExists|| !exists {
+	if !emailExists || !uuidExists || !exists {
 		return nil, status.Errorf(codes.Unauthenticated, "token was dismissed: %v", err)
 	}
 
@@ -205,15 +204,15 @@ func (h *AdminHandler) ValidateToken(ctx context.Context, req *pb.TokenValidatio
 		return nil, status.Errorf(codes.Internal, "could not unmarshal data: %v", err)
 	}
 
-	for _, admin := range admins{
+	for _, admin := range admins {
 		if admin.Uuid != Uuid && admin.APIKey != apiKey && admin.Email != jwtemail {
-			return  nil, status.Errorf(codes.NotFound, "server returned a 404 response")
+			return nil, status.Errorf(codes.NotFound, "server returned a 404 response")
 		}
 	}
 
-	return  &pb.TokenValidationResponse{
+	return &pb.TokenValidationResponse{
 		IsValid: true,
-		Email: jwtemail,
+		Email:   jwtemail,
 	}, nil
 }
 
@@ -236,31 +235,31 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 
 	var loginRequestToken string
 
-	for _, admin := range admins{
+	for _, admin := range admins {
 		if email != admin.Email {
-			return  nil, status.Errorf(codes.NotFound, "server returned a 404 response")
+			return nil, status.Errorf(codes.NotFound, "server returned a 404 response")
 		}
 
-		user := map[string]interface{}{
-			"email": admin.Email,
-			"uuid":  admin.Uuid,
-			"apiKey": admin.APIKey,
-			"otp":   admin.OTP,
-			"otpExpiry": admin.OTPExpiry,
-			"jwt": admin.Jwt,
+		user := structures.AdminStructs{
+			Email:     admin.Email,
+			Uuid:      admin.Uuid,
+			APIKey:    admin.APIKey,
+			OTP:       admin.OTP,
+			OTPExpiry: admin.OTPExpiry,
+			Jwt:       admin.Jwt,
 		}
 
-		if otp != user["otp"]{
+		if otp != user.OTP {
 			return nil, status.Errorf(codes.PermissionDenied, "invalid otp provided")
 		}
 
-		otpExpiry :=  user["otpExpiry"].(float64)
+		otpExpiry, err := strconv.Atoi(user.OTPExpiry)
 
-		if time.Now().Unix() > int64(otpExpiry){
+		if time.Now().Unix() > int64(otpExpiry) {
 			return nil, status.Errorf(codes.PermissionDenied, "otp has expired")
 		}
 
-		validateLongTermToken, err := utils.ValidateToken(user["jwt"].(string))
+		validateLongTermToken, err := utils.ValidateToken(user.Jwt)
 		if err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, "invalid long term token: %v", err)
 		}
@@ -277,11 +276,11 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 				infoData["APIKey"].(string),
 			)
 
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "could not generate new long term token: %v", err)
-			}
+			// if err != nil {
+			// 	return nil, status.Errorf(codes.Internal, "could not generate new long term token: %v", err)
+			// }
 
-			user["jwt"] = newLongTermToken
+			user.Jwt = newLongTermToken
 
 			// Update the admin data with the new long-term token
 			admin.Jwt = newLongTermToken
@@ -295,9 +294,9 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 			if err := os.WriteFile(fileName, updateData, 0644); err != nil {
 				return nil, status.Errorf(codes.Internal, "could not write updated admin data to file: %v", err)
 			}
-		} 
+		}
 		// generate login request token
-	 	loginRequestToken, err = utils.GenerateRequestJWTToken(user["uuid"].(string), user["apiKey"].(string))
+		loginRequestToken, err = utils.GenerateRequestJWTToken(user.Uuid, user.APIKey)
 
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "could not generate login request token: %v", err)
@@ -308,6 +307,6 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 
 	return &pb.OtpVerificationResponse{
 		IsVerified: true,
-		Message: loginRequestToken,
+		Message:    loginRequestToken,
 	}, nil
 }
