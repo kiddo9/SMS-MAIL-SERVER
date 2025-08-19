@@ -19,8 +19,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	resp, err := client.VerifyOtp(ctx, &pb.OtpVerificationRequest{
-		Otp:   "GNUAEJzP",
+	resp, err := client.LoginAdmin(ctx, &pb.OtpRequest{
 		Email: "dkido913@gmail.com",
 	})
 

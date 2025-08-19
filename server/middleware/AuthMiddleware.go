@@ -3,11 +3,11 @@ package middleware
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/kiddo9/SMS-MAIL-SERVER/structures"
 	"github.com/kiddo9/SMS-MAIL-SERVER/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -27,20 +27,20 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "metadata not found in context")
+		return nil, status.Errorf(codes.Unauthenticated, "unauthorizied request. request denied")
 	}
 
 	authToken := md.Get("auth-token")
 	if len(authToken) == 0 {
-		return nil, status.Errorf(codes.Unauthenticated, "auth token not provided")
+		return nil, status.Errorf(codes.Unauthenticated, "requested denied")
 	}
 	if len(authToken) > 1 {
-		return nil, status.Errorf(codes.Unauthenticated, "multiple auth tokens provided")
+		return nil, status.Errorf(codes.Unauthenticated, "invalid request. request terminated")
 	}
 
 	decerptedToken, err := utils.ValidateToken(authToken[0])
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid auth token: %v", err)
+		return nil, status.Errorf(codes.Unauthenticated, "invalid aurgument")
 	}
 
 	details, ok := decerptedToken.Claims.(jwt.MapClaims)
@@ -50,42 +50,41 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 
 	fileName := "storage/admin.json"
 
-	body, err := os.Open(fileName)
-	fmt.Print(body)
+	_, err = os.Open(fileName)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not open file: %v", err)
+		return nil, status.Errorf(codes.Internal, "internal server error")
 	}
 
 	data, err := os.ReadFile(fileName)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not read file: %v", err)
+		return nil, status.Errorf(codes.Internal, "internal server error")
 	}
 
-	var admins []map[string]interface{}
+	var admins []structures.AdminStructs
 	err = json.Unmarshal(data, &admins)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "could not read file: %v", err)
+		return nil, status.Errorf(codes.Internal, "internal server error")
 	}
 
 	for _, admin := range admins {
-		if details["uuid"] == admin["uuid"] {
-			if admin["ApiKey"] == details["APIKey"] {
+		if details["uuid"] == admin.Uuid {
+			if admin.APIKey == details["APIKey"] {
 				jwtExpired := details["exp"].(float64)
 
 				if time.Now().Unix() > int64(jwtExpired) {
-					GetAdminLongTermToken := admin["Jwt"].(string)
+					GetAdminLongTermToken := admin.Jwt
 
 					validateToken, err := utils.ValidateToken(GetAdminLongTermToken)
 					if err != nil {
-						return nil, status.Errorf(codes.Unauthenticated, "invalid long term token: %v", err)
+						return nil, status.Errorf(codes.Unauthenticated, "unkown user")
 					}
 
 					infoData, ok := validateToken.Claims.(jwt.MapClaims)
 					if !ok || !validateToken.Valid {
-						return nil, status.Errorf(codes.Unauthenticated, "invalid long term token")
+						return nil, status.Errorf(codes.Unauthenticated, "unkown")
 					}
 
 					if time.Now().Unix() < int64(infoData["exp"].(float64)) {
@@ -98,13 +97,13 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 						)
 
 						if err != nil {
-							return nil, status.Errorf(codes.Internal, "could not generate new token: %v", err)
+							return nil, status.Errorf(codes.Internal, "internal server error")
 						}
 
 						md.Set("auth-token", newToken)
 						ctx = metadata.NewIncomingContext(ctx, md)
 					} else {
-						return nil, status.Errorf(codes.Unauthenticated, "long term token has expired")
+						return nil, status.Errorf(codes.Unauthenticated, "expired")
 					}
 				}
 			}

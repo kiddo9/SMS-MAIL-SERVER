@@ -5,20 +5,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
-var secretKey string
-
-func init(){
-	err := godotenv.Load()
-
-	if err != nil {
-		panic("Error loading .env file")
-	}
-
-	secretKey = os.Getenv("JWT_SECRET_KEY")
-}
+var secretKey string = os.Getenv("JWT_SECRET_KEY")
 
 func GenerateJWTToken(email string, uuid string, APIKey string, Time int64) (string, error) {
 	//create claims (that is data that will be encoded in the JWT)

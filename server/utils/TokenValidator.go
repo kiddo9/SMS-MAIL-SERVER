@@ -5,23 +5,13 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 
 var returnResponse map[string]interface{}
 
-var jwtSecretKey string
+var jwtSecretKey string = os.Getenv("JWT_SECRET_KEY")
 
-func init(){
-	err := godotenv.Load()
-
-	if err != nil {
-		panic("Error loading .env file")
-	}
-
-	jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
-}
 
 // ValidateToken validates the JWT token and returns the parsed token or an error
 func ValidateToken(Token string) (*jwt.Token, error) {

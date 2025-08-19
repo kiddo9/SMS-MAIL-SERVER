@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/kiddo9/SMS-MAIL-SERVER/config"
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
 	"github.com/kiddo9/SMS-MAIL-SERVER/structures"
 	"github.com/kiddo9/SMS-MAIL-SERVER/utils"
@@ -97,6 +98,12 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest) (*pb.
 			return nil, status.Errorf(codes.Internal, "unable to write into file")
 		}
 		//logic to send to email
+
+		_, err = config.AuthenticationMailling(emails.Email, token)
+
+		if err != nil {
+			return nil, status.Errorf(codes.Canceled, "unable to send email. check your internet connection")
+		}
 	}
 
 	return &pb.OtpResponse{
@@ -149,6 +156,11 @@ func (h *AdminHandler) SendOtp(ctx context.Context, req *pb.OtpRequest) (*pb.Otp
 		}
 
 		//logic to send to email
+		_, err = config.AuthenticationMailling(admin["email"].( string), token)
+
+		if err != nil {
+			return nil, status.Errorf(codes.Canceled, "unable to send email. check your internet connection")
+		}
 	}
 
 	return &pb.OtpResponse{
@@ -241,7 +253,7 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 		}
 
 		user := structures.AdminStructs{
-			Email:     admin.Email,
+			//Email:     admin.Email,
 			Uuid:      admin.Uuid,
 			APIKey:    admin.APIKey,
 			OTP:       admin.OTP,
@@ -254,6 +266,10 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 		}
 
 		otpExpiry, err := strconv.Atoi(user.OTPExpiry)
+
+		if err != nil {
+			return nil, status.Errorf(codes.PermissionDenied, "Error occoured during convertion")
+		}
 
 		if time.Now().Unix() > int64(otpExpiry) {
 			return nil, status.Errorf(codes.PermissionDenied, "otp has expired")
@@ -276,9 +292,9 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 				infoData["APIKey"].(string),
 			)
 
-			// if err != nil {
-			// 	return nil, status.Errorf(codes.Internal, "could not generate new long term token: %v", err)
-			// }
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "unable to generate tokens")
+			}
 
 			user.Jwt = newLongTermToken
 
