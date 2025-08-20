@@ -5,7 +5,7 @@ services:
     ports:
       - 9001:9001
     env_file:
-      - .env
+      - ./server/.env
 
   #   # volumes:
   #   #   - ./server:/app
