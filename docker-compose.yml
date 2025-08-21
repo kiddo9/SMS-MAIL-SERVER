@@ -1,11 +1,14 @@
 services:
-  server:
-    build: ./server
-    container_name: Neo_server
-    ports:
-      - 9001:9001
-  #   # volumes:
-  #   #   - ./server:/app
+  # server:
+  #   build: ./server
+  #   container_name: Neo_server
+  #   ports:
+  #     - 9001:9001
+  #   env_file:
+  #     - ./server/.env
+
+  # #   # volumes:
+  # #   #   - ./server:/app
 
   envoy:
     image: envoyproxy/envoy:dev-d4a94e75908cd65d159101ebf3fa9e106be62491
@@ -15,18 +18,18 @@ services:
       - 9901:9901
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
-    depends_on:
-      - server
+    # depends_on:
+    #   - server
 
-  nginx_client:
-    build:
-      context: .
-      dockerfile: ./nginx/Dockerfile
-    container_name: Neo_nginx_client
-    ports:
-      - 8000:80
-      - 443:443
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - envoy
+  # nginx_client:
+  #   build:
+  #     context: .
+  #     dockerfile: ./nginx/Dockerfile
+  #   container_name: Neo_nginx_client
+  #   ports:
+  #     - 8000:80
+  #     - 443:443
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - envoy
