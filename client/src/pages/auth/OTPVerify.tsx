@@ -1,26 +1,76 @@
 import { useEffect, useState } from "react";
 import AdminClient from "../../lib/adminClient"
 import {OtpRequest, OtpVerificationRequest} from "../../proto/Admin"
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 const OTPVerify = () => {
     const [otp, setOtp] = useState('');
     const [allowReset, setAllowReset] = useState(false);
+    const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
+    const [alert, setAlert] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [searchParams] = useSearchParams()
+    const nav = useNavigate()
+    const {setAtkFunc} = useAuthContext();
+
+    const tk = searchParams.get('tk');
     
-    const email = '';
+    useEffect(() => {
+        if(!tk) return
+        AdminClient.validateToken({token: tk}).then((response) => {
+            if(!response || !response.response.isValid) return
+            setEmail(response.response.email);
+        })
+    }, [tk])
     // const [password, setPassword] = useState('');
     const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        try {
+            e.preventDefault();
 
-        const response = await AdminClient.verifyOtp(OtpVerificationRequest.create({email: email, otp: otp}),{})
+            const response = await AdminClient.verifyOtp(OtpVerificationRequest.create({email: email, otp: otp}),{})
 
+            if(!response || !response.response.isVerified){
+                setError("Failed Verification");
+                setAlert('');
+                return;
+            }
+
+
+            setAtkFunc(response.response.message);
+            nav('/');
+            
+        } catch (error) {
+            if(import.meta.env.VITE_ENV === "development") console.log(error);
+            setError("Failed to login");
+            setAlert('');
+        }finally{
+            setLoading(false);
+        }
         
-        console.log(response);
     }
 
     const handleOTPResend = async() =>{
-        setAllowReset(false);
-        const response = await AdminClient.sendOtp(OtpRequest.create({email: email}),{})
-        console.log(response);
+        try {
+            setAllowReset(false);
+            const request = await AdminClient.sendOtp(OtpRequest.create({email: email}),{})
+
+            if(!request || !request.response.message){
+                setError("Failed to resend OTP");
+                setAlert('');
+                return;
+            }
+            setAlert("OTP resent successfully");
+            setError('');
+        } catch (error) {
+            if(import.meta.env.VITE_ENV === "development") console.log(error);
+            setError("Failed to login");
+            setAlert('');
+        }finally{
+            setLoading(false);
+        }
+        
     }
 
     useEffect(() => {
@@ -32,6 +82,14 @@ const OTPVerify = () => {
         }
         else return
     }, [allowReset])
+
+    if(!tk){ 
+        setTimeout(() => {
+            nav('/auth/login');
+        }, 2000)
+        return <div className='flex flex-col h-screen justify-center font-semibold items-center bg-[#6699ff]/10'>Invalid Request. Redirecting...</div>
+    }
+    if(!email) return <div className='flex flex-col h-screen justify-center font-semibold items-center bg-[#6699ff]/10'>Loading...</div>
   return (
     <div className='flex flex-col h-screen justify-center items-center bg-[#6699ff]/10'>
         
@@ -46,7 +104,9 @@ const OTPVerify = () => {
                 
                 <input value={otp} onChange={(e) => setOtp(e.target.value)} className='p-2 border-2 focus:border-[#6699ff] border-gray-200 rounded-md w-full' type="text" placeholder='Enter the OTP...' />
             </div>
-            <button type="submit" className='mt-1 bg-[#6699ff] hover:bg-[#6699ff]/80 cursor-pointer text-white p-2 rounded-md'>Verify</button>
+            <button disabled={loading} type="submit" className='mt-1 bg-[#6699ff] hover:bg-[#6699ff]/80 cursor-pointer text-white p-2 rounded-md'>{loading ? "Verifying..." : "Verify"}</button>
+            {error && <span className='mt-1 text-xs text-center text-red-500'>{error}</span>}
+            {alert && <span className='mt-1 text-xs text-center text-green-500'>{alert}</span>}
             <button disabled={!allowReset} onClick={handleOTPResend} className='mt-1 bg-transparent self-start text-xs font-semibold cursor-pointer text-[#6699ff] disabled:text-gray-500 disabled:cursor-not-allowed'>Resend</button>
         </form>
     </div>

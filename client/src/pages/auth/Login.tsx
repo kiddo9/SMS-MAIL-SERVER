@@ -1,19 +1,46 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import AdminClient from "../../lib/adminClient"
 import {OtpRequest} from "../../proto/Admin"
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useNavigate } from "react-router-dom";
+
 
 const Login = () => {
     const [email, setEmail] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const nav = useNavigate()
+    const { executeRecaptcha } = useGoogleReCaptcha();
     // const [password, setPassword] = useState('');
     const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        try {
+            e.preventDefault();
+            setLoading(true);
+            if (!executeRecaptcha) {
+                console.log("Execute recaptcha not yet available");
+                return;
+            }
 
-        const response = await AdminClient.loginAdmin(OtpRequest.create({email: email}), {
-           "recaptcha-token": import.meta.env.VITE_RECAPTCHA_TOKEN 
-        })
+            const token = await executeRecaptcha("login");
 
+            const request = await AdminClient.loginAdmin(OtpRequest.create({email: email}), {
+            "recaptcha-token": token
+            })
+
+            if(!request || !request.response.message) {
+                setError("Failed to login");
+                return;
+            }
+
+            nav(`/auth/verify?tk=${request.response.message}`);
+        } catch (error) {
+            if(import.meta.env.VITE_ENV === "development") console.log(error);
+            setError("Failed to login");
+        }finally{
+            setLoading(false);
+        }
         
-        console.log(response);
+
     }
   return (
     <div className='flex flex-col h-screen justify-center items-center bg-[#6699ff]/10'>
@@ -33,7 +60,8 @@ const Login = () => {
                 <label htmlFor="password" className='block mb-1 text-sm'>Password</label>
                 <input value={password} onChange={(e) => setPassword(e.target.value)} className='p-2 border-2 focus:border-[#6699ff] border-gray-200 rounded-md w-full' type="password" placeholder='Password' />
             </div> */}
-            <button type="submit" className='mt-1 bg-[#6699ff] hover:bg-[#6699ff]/80 cursor-pointer text-white p-2 rounded-md'>Sign In</button>
+            <button disabled={loading} type="submit" className='mt-1 bg-[#6699ff] hover:bg-[#6699ff]/80 cursor-pointer text-white p-2 rounded-md disabled:bg-[#6699ff]/50'>{loading ? "Submitting..." : "Sign In"}</button>
+            {error && <p className='text-red-500 text-center text-sm mt-1'>{error}</p>}
         </form>
     </div>
 
