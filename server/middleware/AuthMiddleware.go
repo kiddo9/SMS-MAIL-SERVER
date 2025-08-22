@@ -19,9 +19,11 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 	skipAuth := map[string]bool{
 		"/message.proto.AdminService/LoginAdmin":    true,
 		"/message.proto.AdminService/ValidateToken": true,
+		"/message.proto.AdminService/SendOtp": true,
+		"/message.proto.AdminService/VerifyOtp": true,
 	}
 
-	if skipAuth[info.FullMethod] {
+	if _, ok := skipAuth[info.FullMethod]; ok {
 		return handler(ctx, req)
 	}
 
