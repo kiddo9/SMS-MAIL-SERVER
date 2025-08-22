@@ -4,6 +4,9 @@ import NotFound from "./pages/NotFound"
 import OTPVerify from "./pages/auth/OTPVerify"
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3"
 import AuthContextProvider from "./contexts/AuthContext"
+import Home from "./pages/Home"
+import Footer from "./components/Footer"
+import NavBar from "./components/NavBar"
 
 function App() {
   
@@ -12,6 +15,7 @@ function App() {
 
     <BrowserRouter>
       <AuthContextProvider>
+        <NavBar/>
         <Routes>
           <Route path="/auth/*" element={
             <>
@@ -24,8 +28,10 @@ function App() {
               </GoogleReCaptchaProvider>
             </>
           } />
+          <Route path="/" element={<Home />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Footer/>
       </AuthContextProvider>
     </BrowserRouter>
   )
