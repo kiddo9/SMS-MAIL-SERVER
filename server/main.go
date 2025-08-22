@@ -27,7 +27,7 @@ func main() {
 
 	lis, err := net.Listen("tcp",":"+port)
 
-	runningMessage := fmt.Sprintf("Server is running on port %s", port)
+	runningMessage := fmt.Sprintf("Server is running on port %s, address includes %s", port, lis.Addr())
 	fmt.Println(runningMessage)
 
 	if err != nil {
