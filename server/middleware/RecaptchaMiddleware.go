@@ -21,9 +21,9 @@ func RecaptchaMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryS
 	}
 
 	recaptchaToken := md.Get("recaptcha-token")
-	fmt.Println(recaptchaToken)
+	fmt.Println(recaptchaToken, recaptchaToken[0])
 	
-	if recaptchaToken[0] == "" {
+	if len(recaptchaToken) == 0 || recaptchaToken[0] == "" {
 		return nil, status.Errorf(codes.Unauthenticated, "Invalid arguments")
 	}
 
