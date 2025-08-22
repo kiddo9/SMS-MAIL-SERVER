@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package fileUpload;
+
+option go_package = "message/proto";
+
+message fileUploadRequest {
+    bytes Content = 1;
+}
+
+
+message fileUploadResponse {
+    bool Status = 1;
+    string Message = 2;
+}
+
+
+service fileUploadServices {
+    rpc FileUpload(fileUploadRequest) returns (fileUploadResponse){}
+}
