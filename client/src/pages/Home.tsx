@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, MessageSquare, CheckCircle, AlertCircle, X, NotepadText} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -75,9 +76,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-4xl flex flex-col mx-auto px-6 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-4">
           <div className="flex justify-center items-center px-4 py-2 rounded-full text-lg font-bold mb-6 text-center">
             <img className="rotate-y-180" width={30} src="/logo-icon.png" alt="Logo"/>
             <span>SMS Notifications Made Easy</span>
@@ -113,6 +114,13 @@ const Home = () => {
             </div>
           </div>
         </div>
+
+        <Link to="/templates" className='self-center cursor-pointer'>
+          <button className="mb-12 px-8 py-3  bg-transparent border-2 border-[#6699ff] text-[#6699ff] font-semibold rounded-lg hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors shadow-xs">
+            Manage Templates
+          </button>
+        </Link>
+        
 
         {/* Upload Section */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
@@ -174,7 +182,7 @@ const Home = () => {
                   </div>
                   <button
                     onClick={resetUpload}
-                    className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors"
+                    className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -183,10 +191,11 @@ const Home = () => {
 
               {/* Upload Button */}
               <div className="flex justify-center">
-                <button
+                {uploadStatus !== 'success' && (
+                  <button
                   onClick={handleUpload}
                   disabled={uploading}
-                  className="px-8 py-3 bg-[#6699ff] text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                  className="px-8 py-3 bg-[#6699ff] text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors flex items-center space-x-2"
                 >
                   {uploading ? (
                     <>
@@ -200,20 +209,23 @@ const Home = () => {
                     </>
                   )}
                 </button>
+                )}
+                
               </div>
             </div>
           )}
 
           {/* Status Messages */}
           {uploadStatus === 'success' && (
-            <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="mt-6 bg-green-50 border flex justify-between border-green-200 rounded-lg p-4">
               <div className="flex items-center space-x-3">
                 <CheckCircle className="w-6 h-6 text-green-600" />
                 <div>
                   <h4 className="font-semibold text-green-800">File processed successfully!</h4>
-                  <p className="text-sm text-green-700">You can now view the data and send SMS reminders.</p>
+                  
                 </div>
               </div>
+              <button className='px-4 py-2 bg-[#6699ff] text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors'>Send Reminders</button>
             </div>
           )}
 

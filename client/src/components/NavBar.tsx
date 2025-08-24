@@ -9,8 +9,8 @@ const NavBar = () => {
             <h1 className="text-2xl font-bold text-[#6699ff]">SMS Service</h1>
           </div>
           <div className="flex items-center">
-            <a href="#features" className="text-[#6699ff] hover:text-blue-800 mr-4">Features</a>
-            <a href="#pricing" className="text-[#6699ff] hover:text-blue-800 mr-4">Pricing</a>
+            <a href="/templates" className="text-[#6699ff] hover:text-blue-800 mr-4">Templates</a>
+            <a href="/sent" className="text-[#6699ff] hover:text-blue-800 mr-4">Sent</a>
             <a href="#contact" className="text-[#6699ff] hover:text-blue-800">Contact</a>
           </div>
         </div>

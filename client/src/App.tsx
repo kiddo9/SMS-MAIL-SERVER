@@ -15,7 +15,7 @@ function App() {
 
     <BrowserRouter>
       <AuthContextProvider>
-        <NavBar/>
+        
         <Routes>
           <Route path="/auth/*" element={
             <>
@@ -28,8 +28,15 @@ function App() {
               </GoogleReCaptchaProvider>
             </>
           } />
-          <Route path="/" element={<Home />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/*" element={
+            <>
+              <NavBar/>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </>
+          } />
         </Routes>
         <Footer/>
       </AuthContextProvider>
