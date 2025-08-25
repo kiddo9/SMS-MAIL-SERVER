@@ -41,7 +41,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 		for _, row := range result[sheet] {
 			name := row[0]
-			fmt.Println("names : %v",name)
+			fmt.Printf("names : %v",name)
 		}
 	}
 
