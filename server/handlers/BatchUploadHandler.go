@@ -26,17 +26,20 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		return nil, status.Errorf(codes.Unknown, "file can't be opened %v", err)
 	}
 
-	fmt.Println(readFile)
+	sheets := readFile.GetSheetList()
 
-	rows, err := readFile.GetRows("sheet1")
+	for _, sheet := range sheets{
+		rows, err := readFile.GetRows(sheet)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Unknown, "file can't be read. make sure file sent is excel %v", err)
+		if err != nil {
+			return nil, status.Errorf(codes.Unknown, "file can't be read. make sure file sent is excel %v", err)
+		}
+
+		for _, row := range rows {
+			fmt.Println(row)
+		}
 	}
 
-	for _, row := range rows {
-		fmt.Println(row)
-	}
 	return &pb.FileUploadResponse{
 		Status: true,
 		Message: "email and sms sent",
