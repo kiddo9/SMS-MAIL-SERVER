@@ -8,11 +8,10 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kiddo9/SMS-MAIL-SERVER/handlers"
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
-	"github.com/kiddo9/SMS-MAIL-SERVER/middleware"
 	"google.golang.org/grpc"
 )
 
-func init(){
+func init() {
 	err := godotenv.Load(".env")
 
 	if err != nil {
@@ -20,12 +19,11 @@ func init(){
 	}
 }
 
-
 func main() {
-	grpcServer := grpc.NewServer(middleware.Interceptors(middleware.RecaptchaMiddleware, middleware.AuthMiddleware))
+	grpcServer := grpc.NewServer()
 	port := os.Getenv("PORT")
 
-	lis, err := net.Listen("tcp",":"+port)
+	lis, err := net.Listen("tcp", ":"+port)
 
 	runningMessage := fmt.Sprintf("Server is running on port %s, address includes %s", port, lis.Addr())
 	fmt.Println(runningMessage)
