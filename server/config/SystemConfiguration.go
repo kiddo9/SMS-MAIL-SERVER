@@ -63,7 +63,7 @@ func AuthenticationMailling(email string, otp string) (bool, error){
 }
 
 
-func BulkEmail(name string, pendingPrice float32, course string, Date string, emailAddress string, phoneNumber int64, senderEmail string)(bool, error){
+func BulkEmail(name string, pendingPrice string, course string, Date string, emailAddress string, phoneNumber string, senderEmail string)(bool, error){
 	tmp, err := template.New("BatchUploadEmail").Parse(templates.EmailTemplate1)
 
 	if err != nil {
