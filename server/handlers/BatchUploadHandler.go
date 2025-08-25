@@ -26,6 +26,8 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		return nil, status.Errorf(codes.Unknown, "file can't be opened %v", err)
 	}
 
+	result := make(map[string][][]string)
+
 	sheets := readFile.GetSheetList()
 
 	for _, sheet := range sheets{
@@ -35,10 +37,10 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 			return nil, status.Errorf(codes.Unknown, "file can't be read. make sure file sent is excel %v", err)
 		}
 
-		for _, row := range rows {
-			fmt.Println(row)
-		}
+		result[sheet] = rows
 	}
+
+	fmt.Println(result)
 
 	return &pb.FileUploadResponse{
 		Status: true,
