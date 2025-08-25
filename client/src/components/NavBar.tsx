@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 
 
 const NavBar = () => {
@@ -9,9 +10,9 @@ const NavBar = () => {
             <h1 className="text-2xl font-bold text-[#6699ff]">SMS Service</h1>
           </div>
           <div className="flex items-center">
-            <a href="/templates" className="text-[#6699ff] hover:text-blue-800 mr-4">Templates</a>
-            <a href="/sent" className="text-[#6699ff] hover:text-blue-800 mr-4">Sent</a>
-            <a href="#contact" className="text-[#6699ff] hover:text-blue-800">Contact</a>
+            <Link to="/templates" className="text-[#6699ff] hover:text-blue-800 mr-4">Templates</Link>
+            <Link to="/sent" className="text-[#6699ff] hover:text-blue-800 mr-4">Sent</Link>
+            <Link to="#contact" className="text-[#6699ff] hover:text-blue-800">Contact</Link>
           </div>
         </div>
       </nav>
