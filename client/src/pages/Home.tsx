@@ -1,14 +1,16 @@
 import { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, MessageSquare, CheckCircle, AlertCircle, X, NotepadText} from 'lucide-react';
 import { Link } from 'react-router-dom';
+import FileUploadClient from '../lib/fileUploadClient';
+import {fileUploadRequest} from '../proto/FileUpload'
 
 const Home = () => {
   const [dragActive, setDragActive] = useState(false);
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', null
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null); // 'success', 'error', null
 
-  const handleDrag = useCallback((e) => {
+  const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -18,7 +20,7 @@ const Home = () => {
     }
   }, []);
 
-  const handleDrop = useCallback((e) => {
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -29,7 +31,7 @@ const Home = () => {
     }
   }, []);
 
-  const handleFileSelect = (selectedFile) => {
+  const handleFileSelect = (selectedFile: File) => {
     const allowedTypes = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'text/csv',
@@ -46,7 +48,7 @@ const Home = () => {
     }
   };
 
-  const handleFileInput = (e) => {
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       handleFileSelect(e.target.files[0]);
     }
@@ -59,9 +61,20 @@ const Home = () => {
     
     // Simulate file processing
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const reader = new FileReader();
+      reader.onload = async(event) => {
+        const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const request = await FileUploadClient.fileUpload(fileUploadRequest.create({content: uint8Array}));
+
+        const response = request.response;
+
+        console.log(response);
+      }
+      reader.readAsArrayBuffer(file);
       setUploadStatus('success');
     } catch (error) {
+      if(import.meta.env.VITE_ENV === "development") console.error(error);
       setUploadStatus('error');
     } finally {
       setUploading(false);
