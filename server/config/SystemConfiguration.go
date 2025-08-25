@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
-	"strconv"
 
-	"github.com/go-gomail/gomail"
 	"github.com/joho/godotenv"
 	"github.com/kiddo9/SMS-MAIL-SERVER/templates"
 	"google.golang.org/grpc/codes"
@@ -55,27 +53,44 @@ func AuthenticationMailling(email string, otp string) (bool, error){
     if err := tmpl.Execute(&body, info); err != nil {
         panic(err)
     }
-	
-	//create message
-	m := gomail.NewMessage()
-	m.SetHeader("From", MailVariables["SMTP_USER"])
-	m.SetHeader("To", email)
-	m.SetHeader("Subject", "OTP Verification")
-	m.SetBody("text/html", body.String())
 
-	smsPortConvertion, err := strconv.Atoi(MailVariables["SMTP_PORT"])
-
+	_, err = sendEmail(email, body, "OTP Verification")
 	if err != nil {
-		fmt.Print(err, MailVariables)
-		return false, status.Errorf(codes.Internal, "internal server error")
+		panic(err)
 	}
 
-	d := gomail.NewDialer(MailVariables["SMTP_HOST"], int(smsPortConvertion), MailVariables["SMTP_USER"], MailVariables["SMTP_PASSWORD"])
+	return true, nil
+}
 
-	err = d.DialAndSend(m)
 
-	if err != nil{
-	return false, status.Errorf(codes.Internal, "internal server error")
+func BulkEmail(name string, pendingPrice float32, course string, Date string, emailAddress string, phoneNumber int64, senderEmail string)(bool, error){
+	tmp, err := template.New("BatchUploadEmail").Parse(templates.EmailTemplate1)
+
+	if err != nil {
+		panic(err)
+	}
+
+	price := fmt.Sprintf("%v", pendingPrice)
+	number := fmt.Sprintf("%v", phoneNumber)
+
+	Datas := map[string]string{
+		"Name": name,
+		"PendingPrice": price,
+		"course": course,
+		"Date": Date,
+		"phoneNumber": number,
+		"EmailAddress": emailAddress,
+	}
+
+	var body bytes.Buffer
+	err = tmp.Execute(&body, Datas)
+	if err != nil {
+		return false, status.Errorf(codes.Aborted, "process could not be completed")
+	}
+
+	_, err = sendEmail(senderEmail, body, "Friendly Reminder")
+	if err != nil {
+		panic(err)
 	}
 
 	return true, nil
