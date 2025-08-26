@@ -68,7 +68,12 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 		result[sheet] = rows
 
-		for _, row := range result[sheet] {
+		for idx, row := range result[sheet] {
+			
+			if idx == 0 {
+				continue
+			}
+
 			name := row[0]
 			pendingPrice := row[12]
 			phone := row[3]
