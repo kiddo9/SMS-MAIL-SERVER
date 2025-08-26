@@ -67,7 +67,7 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 	tmp, err := template.New("BatchUploadEmail").Parse(templates.EmailTemplate1)
 
 	if err != nil {
-		panic(err)
+		return false, status.Errorf(codes.Internal, "could not resolve template %v",err)
 	}
 
 	price := fmt.Sprintf("%v", pendingPrice)
@@ -85,12 +85,12 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 	var body bytes.Buffer
 	err = tmp.Execute(&body, Datas)
 	if err != nil {
-		return false, status.Errorf(codes.Aborted, "process could not be completed")
+		return false, status.Errorf(codes.Aborted, "process could not be completed. %v", err)
 	}
 
 	_, err = sendEmail(emailAddress, body, "Friendly Reminder")
 	if err != nil {
-		panic(err)
+		return false, status.Errorf(codes.Aborted, "error occured will processing the bulk email")
 	}
 
 	return true, nil
