@@ -79,7 +79,7 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 		"course": course,
 		"Date": Date,
 		"phoneNumber": number,
-		"EmailAddress": emailAddress,
+		"EmailAddress": senderEmail,
 	}
 
 	var body bytes.Buffer
@@ -88,7 +88,40 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 		return false, status.Errorf(codes.Aborted, "process could not be completed")
 	}
 
-	_, err = sendEmail(senderEmail, body, "Friendly Reminder")
+	_, err = sendEmail(emailAddress, body, "Friendly Reminder")
+	if err != nil {
+		panic(err)
+	}
+
+	return true, nil
+}
+
+func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string)(bool, error){
+	tmp, err := template.New("BatchUploadSMS").Parse(templates.SmsTemp)
+
+	if err != nil {
+		panic(err)
+	}
+
+	price := fmt.Sprintf("%v", pendingPrice)
+	number := fmt.Sprintf("%v", phoneNumber)
+
+	Datas := map[string]string{
+		"Name": name,
+		"PendingPrice": price,
+		"course": course,
+		"Date": Date,
+		"phoneNumber": number,
+		"EmailAddress": senderEmail,
+	}
+
+	var body bytes.Buffer
+	err = tmp.Execute(&body, Datas)
+	if err != nil {
+		return false, status.Errorf(codes.Aborted, "process could not be completed")
+	}
+
+	_, err = SendSmsUsingTwiilo(receverNumber, body.String())
 	if err != nil {
 		panic(err)
 	}

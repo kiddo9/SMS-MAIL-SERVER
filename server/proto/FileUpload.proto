@@ -6,6 +6,7 @@ option go_package = "message/proto";
 
 message fileUploadRequest {
     bytes Content = 1;
+    string Date = 2;
 }
 
 
