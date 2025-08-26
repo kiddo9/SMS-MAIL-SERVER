@@ -19,6 +19,10 @@ export interface fileUploadRequest {
      * @generated from protobuf field: bytes Content = 1
      */
     content: Uint8Array;
+    /**
+     * @generated from protobuf field: string Date = 2
+     */
+    date: string;
 }
 /**
  * @generated from protobuf message fileUpload.fileUploadResponse
@@ -37,12 +41,14 @@ export interface fileUploadResponse {
 class fileUploadRequest$Type extends MessageType<fileUploadRequest> {
     constructor() {
         super("fileUpload.fileUploadRequest", [
-            { no: 1, name: "Content", kind: "scalar", jsonName: "Content", T: 12 /*ScalarType.BYTES*/ }
+            { no: 1, name: "Content", kind: "scalar", jsonName: "Content", T: 12 /*ScalarType.BYTES*/ },
+            { no: 2, name: "Date", kind: "scalar", jsonName: "Date", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<fileUploadRequest>): fileUploadRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.content = new Uint8Array(0);
+        message.date = "";
         if (value !== undefined)
             reflectionMergePartial<fileUploadRequest>(this, message, value);
         return message;
@@ -54,6 +60,9 @@ class fileUploadRequest$Type extends MessageType<fileUploadRequest> {
             switch (fieldNo) {
                 case /* bytes Content */ 1:
                     message.content = reader.bytes();
+                    break;
+                case /* string Date */ 2:
+                    message.date = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -70,6 +79,9 @@ class fileUploadRequest$Type extends MessageType<fileUploadRequest> {
         /* bytes Content = 1; */
         if (message.content.length)
             writer.tag(1, WireType.LengthDelimited).bytes(message.content);
+        /* string Date = 2; */
+        if (message.date !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.date);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
