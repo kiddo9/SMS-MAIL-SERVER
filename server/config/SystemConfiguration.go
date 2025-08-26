@@ -88,6 +88,7 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 		return false, status.Errorf(codes.Aborted, "process could not be completed. %v", err)
 	}
 
+	fmt.Println("the bulk email function logic reached here")
 	_, err = sendEmail(emailAddress, body, "Friendly Reminder")
 	if err != nil {
 		fmt.Println(err)
