@@ -24,6 +24,7 @@ const (
 type FileUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Content       []byte                 `protobuf:"bytes,1,opt,name=Content,proto3" json:"Content,omitempty"`
+	Date          string                 `protobuf:"bytes,2,opt,name=Date,proto3" json:"Date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -63,6 +64,13 @@ func (x *FileUploadRequest) GetContent() []byte {
 		return x.Content
 	}
 	return nil
+}
+
+func (x *FileUploadRequest) GetDate() string {
+	if x != nil {
+		return x.Date
+	}
+	return ""
 }
 
 type FileUploadResponse struct {
@@ -122,9 +130,10 @@ var File_proto_FileUpload_proto protoreflect.FileDescriptor
 const file_proto_FileUpload_proto_rawDesc = "" +
 	"\n" +
 	"\x16proto/FileUpload.proto\x12\n" +
-	"fileUpload\"-\n" +
+	"fileUpload\"A\n" +
 	"\x11fileUploadRequest\x12\x18\n" +
-	"\aContent\x18\x01 \x01(\fR\aContent\"F\n" +
+	"\aContent\x18\x01 \x01(\fR\aContent\x12\x12\n" +
+	"\x04Date\x18\x02 \x01(\tR\x04Date\"F\n" +
 	"\x12fileUploadResponse\x12\x16\n" +
 	"\x06Status\x18\x01 \x01(\bR\x06Status\x12\x18\n" +
 	"\aMessage\x18\x02 \x01(\tR\aMessage2c\n" +

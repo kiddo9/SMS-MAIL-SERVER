@@ -47,6 +47,7 @@ func init() {
 func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest)(*pb.FileUploadResponse, error){
 
 	file := req.GetContent()
+	data := req.GetDate()
 
 	readFile, err := excelize.OpenReader(io.NopCloser(bytes.NewReader(file)))
 
@@ -69,15 +70,23 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 		for _, row := range result[sheet] {
 			name := row[0]
-			pendingPrice := row[1]
+			pendingPrice := row[12]
+			phone := row[3]
 			course := row[2]
-			data := row[3]
-			email := row[4]
+			email := row[5]
 			
-			_, err = config.BulkEmail(name, pendingPrice, course, data, Admin.Email, Admin.Phone, email)
+			if pendingPrice != ""{
+				_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email)
 
-			if err != nil {
-				return nil, status.Errorf(codes.Unknown, "unable to complete bulk email and sms")
+				if err != nil {
+					return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
+				}
+
+				_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone)
+
+				if err != nil {
+					return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
+				}
 			}
 		}
 	}
