@@ -32,7 +32,8 @@ func sendEmail(email string, body bytes.Buffer, subject string)(bool, error){
 	err = d.DialAndSend(m)
 
 	if err != nil{
-	return false, status.Errorf(codes.Internal, "internal server error")
+		fmt.Println(err)
+	return false, status.Errorf(codes.Internal, "internal server error %v", err)
 	}
 
 	return true, nil
