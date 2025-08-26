@@ -90,7 +90,8 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 
 	_, err = sendEmail(emailAddress, body, "Friendly Reminder")
 	if err != nil {
-		return false, status.Errorf(codes.Aborted, "error occured will processing the bulk email")
+		fmt.Println(err)
+		return false, status.Errorf(codes.Aborted, "error occured will processing the bulk email. %v", err)
 	}
 
 	return true, nil
