@@ -88,10 +88,8 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 		return false, status.Errorf(codes.Aborted, "process could not be completed. %v", err)
 	}
 
-	fmt.Println("the bulk email function logic reached here")
 	_, err = sendEmail(emailAddress, body, "Friendly Reminder")
 	if err != nil {
-		fmt.Println(err)
 		return false, status.Errorf(codes.Aborted, "error occured will processing the bulk email. %v", err)
 	}
 
@@ -123,7 +121,7 @@ func BulkSms(name string, pendingPrice string, course string, Date string, phone
 		return false, status.Errorf(codes.Aborted, "process could not be completed")
 	}
 
-	_, err = SendSmsUsingTwiilo(receverNumber, body.String())
+	_, err = SendSmsUsingBulk(receverNumber, body.String())
 	if err != nil {
 		panic(err)
 	}
