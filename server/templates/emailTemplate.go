@@ -86,18 +86,19 @@ const EmailTemplate1 = `
     .helpful-links { border-radius:8px; padding:20px; margin-top:24px; }
     .links-title { font-size:18px; margin-bottom:12px; }
     .link { color:#4a90e2; text-decoration:none; }
+    .batchText {display: flex; flex-wrap: wrap; gap: 0.5rem; font-size:1rem; font-weight: 300 }
     .email-footer { padding:20px; text-align:center; font-size:12px; color:#777; }
   </style>
 </head>
 <body>
   <div class="email-container">
     <div class="email-header">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQaUVlv_0lrZg5J2v-eOUmRjEDP3v00c3gxw&s" alt="Company Logo" class="company-logo"/>
+      <img src="https://techneo.ng/wp-content/uploads/2023/04/Artboard-1.png" alt="Company Logo" class="company-logo"/>
     </div>
 
     <div class="email-body">
-      <p class="greeting">Hi {{.Name}},</p>
-      <p>This is a friendly reminder about your outstanding balance of ₦{{.PendingPrice}} for your {{.course}} course. To ensure 
+      <p class="greeting">Hi {{.Name}},</p><br/>
+      <p class="batchText">This is a friendly reminder about your outstanding balance of ₦{{.PendingPrice}} for your {{.course}} course. To ensure 
       continued access to your lectures, please settle your balance by or before {{.Date}}.<br/>
       For your convienience, you can make your payment through online bank transfer. <br/>
 

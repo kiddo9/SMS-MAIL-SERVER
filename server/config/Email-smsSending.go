@@ -2,13 +2,13 @@ package config
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/go-gomail/gomail"
-	"github.com/twilio/twilio-go"
-	openApi "github.com/twilio/twilio-go/rest/api/v2010"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -39,29 +39,51 @@ func sendEmail(email string, body bytes.Buffer, subject string)(bool, error){
 	return true, nil
 }
 
-func SendSmsUsingTwiilo( receiverNumber string, body string)(bool, error){
-	senderNumber := os.Getenv("TWILIO_PHONE_NUMBER")
-	twilioAccountSID := os.Getenv("TWILIO_ACCOUNT_SID")
-	twilioAuthToken := os.Getenv("TWILIO_AUTH_TOKEN")
+func SendSmsUsingBulk( receiverNumber string, body string)(bool, error){
+	BULK_USERNAMR := os.Getenv("BULK_USERNAMR")
+	BULKPASSWORD := os.Getenv("BULKPASSWORD")
 
-	smsClient := twilio.NewRestClientWithParams(twilio.ClientParams{
-		Username: twilioAccountSID,
-		Password: twilioAuthToken,
-	})
+	requestUrl :=fmt.Sprintf("https://api.bulksms.com/v1/messages/send?to=%v&body=%v", receiverNumber, body) 
 
-	//create message 
-	createmessageParams := &openApi.CreateMessageParams{}
-	createmessageParams.SetTo(receiverNumber)
-	createmessageParams.SetFrom(senderNumber)
-	createmessageParams.SetBody(body)
+	client := &http.Client{}
 
-	//send sms
-	_, err := smsClient.Api.CreateMessage(createmessageParams)
+	req, err := http.NewRequest("GET", requestUrl, nil)
 
 	if err != nil {
-		fmt.Println(err)
-		return false, status.Errorf(codes.Internal, "Something went wrong %v", err)
+		return false, status.Errorf(codes.Canceled, "an error occured while processing your request %v", err)
 	}
+
+	credentials := fmt.Sprintf("%v:%v", BULK_USERNAMR, BULKPASSWORD)
+	encodedCredentials := base64.StdEncoding.EncodeToString([]byte(credentials))
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Basic "+ encodedCredentials)
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
+	}
+
+	defer resp.Body.Close()
 
 	return true, nil
 }
+
+
+func SendSmsFunction2( receiverNumber string, body string)(bool, error){
+	EBULK_USERNAMR := os.Getenv("EBULK_USERNAMR")
+	EBULKAPIKEY := os.Getenv("EBULKAPIKEY")
+
+	requestUrl := fmt.Sprintf("https://api.ebulksms.com/sendsms?username=%v&apikey=%v&sender=%v&message=%v&flash=0&recipients=%v&dndsender=%v",EBULK_USERNAMR,EBULKAPIKEY,"Neo Cloud Technologies",body,receiverNumber, 0 )
+
+	resp, err := http.Get(requestUrl)
+	if err != nil {
+		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
+	}
+	defer resp.Body.Close()
+
+	return true, nil
+}
+
+//?username=your_email_address& apikey=your_apikey&sender=your_sender_name& messagetext=your_message&flash=0& recipients=23480...,23470...&dndsender=1

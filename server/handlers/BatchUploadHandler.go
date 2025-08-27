@@ -23,7 +23,7 @@ var datas []byte
 var body []structures.AdminStructs
 var Admin structures.AdminStructs
 
-func init() {
+func LoadAdminFiles() {
 	_, err := os.Open(fileName)
 
 	if err != nil {
@@ -45,6 +45,7 @@ func init() {
 }
 
 func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest)(*pb.FileUploadResponse, error){
+	LoadAdminFiles()
 
 	file := req.GetContent()
 	data := req.GetDate()
