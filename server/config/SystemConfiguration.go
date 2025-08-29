@@ -121,16 +121,19 @@ func BulkSms(name string, pendingPrice string, course string, Date string, phone
 		return false, status.Errorf(codes.Aborted, "process could not be completed")
 	}
 
-	_, err = SendSmsUsingBulk(receverNumber, body.String())
+	resp, err := SendSmsUsingBulk(receverNumber, body.String())
 	if err != nil {
 		fmt.Println("seems the first sms server is down. moving to the second sever")
 		return false, status.Errorf(codes.Aborted, "process could not be completed %v", err)
-		// _, err := SendSmsFunction2(receverNumber, body.String())
+	}
+	fmt.Println(resp)
 
-		// if err != nil {
-		// 	return false, status.Errorf(codes.Aborted, "process could not be completed. seems both sms servers are down")
-		// }
+	resp2, err := SendSmsFunction2(receverNumber, body.String())
+
+	if err != nil {
+		return false, status.Errorf(codes.Aborted, "process could not be completed. seems both sms servers are down")
 	}
 
+	fmt.Println(resp2)
 	return true, nil
 }
