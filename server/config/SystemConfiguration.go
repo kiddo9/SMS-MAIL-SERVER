@@ -123,7 +123,12 @@ func BulkSms(name string, pendingPrice string, course string, Date string, phone
 
 	_, err = SendSmsUsingBulk(receverNumber, body.String())
 	if err != nil {
-		panic(err)
+		fmt.Println("seems the first sms server is down. moving to the second sever")
+		_, err := SendSmsFunction2(receverNumber, body.String())
+
+		if err != nil {
+			return false, status.Errorf(codes.Aborted, "process could not be completed. seems both sms servers are down")
+		}
 	}
 
 	return true, nil
