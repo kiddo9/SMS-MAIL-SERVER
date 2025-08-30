@@ -96,7 +96,7 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 	return true, nil
 }
 
-func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string)(bool, error){
+func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string, method string)(bool, error){
 	tmp, err := template.New("BatchUploadSMS").Parse(templates.SmsTemp)
 
 	if err != nil {
@@ -121,19 +121,24 @@ func BulkSms(name string, pendingPrice string, course string, Date string, phone
 		return false, status.Errorf(codes.Aborted, "process could not be completed")
 	}
 
-	resp, err := SendSmsUsingBulk(receverNumber, body.String())
-	if err != nil {
-		fmt.Println("seems the first sms server is down. moving to the second sever")
-		return false, status.Errorf(codes.Aborted, "process could not be completed %v", err)
-	}
-	fmt.Println(resp)
-
-	resp2, err := SendSmsFunction2(receverNumber, body.String())
-
-	if err != nil {
-		return false, status.Errorf(codes.Aborted, "process could not be completed. seems both sms servers are down")
+	if method == "Bulksms" {
+		resp, err := SendSmsUsingBulk(receverNumber, body.String())
+		if err != nil {
+			fmt.Println("seems the first sms server is down. moving to the second sever")
+			return false, status.Errorf(codes.Aborted, "process could not be completed %v", err)
+		}
+		fmt.Println(resp)
 	}
 
-	fmt.Println(resp2)
+	if method == "EBulksms" {
+		resp2, err := SendSmsFunction2(receverNumber, body.String())
+
+		if err != nil {
+			return false, status.Errorf(codes.Aborted, "process could not be completed. seems both sms servers are down")
+		}
+
+		fmt.Println(resp2)
+	}
+	
 	return true, nil
 }

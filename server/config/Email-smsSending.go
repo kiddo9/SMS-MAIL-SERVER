@@ -42,41 +42,28 @@ func sendEmail(email string, body bytes.Buffer, subject string)(bool, error){
 func SendSmsUsingBulk( receiverNumber string, body string)(bool, error){
 	BULKAPITOKEN := os.Getenv("BULKAPITOKEN")
 
-	requestUrl := "https://www.bulksmsnigeria.com/api/v2/sms"
+	requestUrl := fmt.Sprintf("https://www.bulksmsnigeria.com/api/v2/sms/create?api_token=%v&from=%v&to=%v&body=%v", BULKAPITOKEN, "Neo cloud Technologies", receiverNumber, body)
 
-	bodyParameters := map[string]string{
-		"from": "Neo cloud Technologies",
-		"to": receiverNumber,
-		"body": body,
-		"api_token": BULKAPITOKEN,
-		"gateway": "direct-refund",
-	}
+	client := &http.Client{}
 
-	jsonBody, err := json.Marshal(bodyParameters)
+	req, err := http.NewRequest("POST", requestUrl, nil)
 
 	if err != nil {
+		fmt.Println(err)
 		return false, status.Errorf(codes.Canceled, "an error occured while processing your request %v", err)
 	}
 
-	resp, err := http.Post(requestUrl, "application/json", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 
-	// client := &http.Client{}
-
-	// req, err := http.NewRequest("POST", requestUrl, bytes.NewBuffer(jsonBody))
-
-	// if err != nil {
-	// 	return false, status.Errorf(codes.Canceled, "an error occured while processing your request %v", err)
-	// }
-
-	// req.Header.Set("Accept", "application/json")
-	// req.Header.Set("Content-Type", "application/json")
-
-	// resp, err := client.Do(req)
+	resp, err := client.Do(req)
 
 	if err != nil {
+		fmt.Println(err)
 		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
 	}
 
+	fmt.Println(resp, resp.Status)
 	defer resp.Body.Close()
 
 	return true, nil
@@ -84,7 +71,7 @@ func SendSmsUsingBulk( receiverNumber string, body string)(bool, error){
 
 
 func SendSmsFunction2(receiverNumber string, body string)(bool, error){
-	EBULK_USERNAMR := os.Getenv("EBULK_USERNAME")
+	EBULKUSERNAMR := os.Getenv("EBULK_USERNAME")
 	EBULKAPIKEY := os.Getenv("EBULKAPIKEY")
 
 	requestUrl := "https://api.ebulksms.com/sendsms.json"
@@ -92,7 +79,7 @@ func SendSmsFunction2(receiverNumber string, body string)(bool, error){
 	bodyParameters := map[string]interface{}{
 		"sms": map[string]interface{}{
 			"auth": map[string]interface{}{
-				"username": EBULK_USERNAMR,
+				"username": EBULKUSERNAMR,
 				"apikey": EBULKAPIKEY,
 			},
 			"message": map[string]interface{}{
@@ -103,7 +90,7 @@ func SendSmsFunction2(receiverNumber string, body string)(bool, error){
 			"recipients": map[string]interface{}{
 				"gsm":map[string]interface{}{
 					"msidn": receiverNumber,
-					"msgid": "",
+					"msgid": "1",
 				},
 			},
 			"dndsender": 1,
@@ -118,8 +105,11 @@ func SendSmsFunction2(receiverNumber string, body string)(bool, error){
 
 	resp, err := http.Post(requestUrl, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
+		fmt.Println(err)
 		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
 	}
+
+	fmt.Println(resp, resp.Status)
 	defer resp.Body.Close()
 
 	return true, nil

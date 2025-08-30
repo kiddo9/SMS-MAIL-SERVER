@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 
@@ -12,11 +13,21 @@ import (
 	"github.com/kiddo9/SMS-MAIL-SERVER/structures"
 	"github.com/xuri/excelize/v2"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 type FileUploadStruct struct {
 	pb.UnimplementedFileUploadServicesServer
+}
+
+func contains(slice []string, item string) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
 }
 
 var datas []byte
@@ -42,10 +53,23 @@ func LoadAdminFiles() {
 	}
 
 	body[0] = Admin
+	fmt.Println(Admin)
 }
 
 func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest)(*pb.FileUploadResponse, error){
 	LoadAdminFiles()
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.Unauthenticated, "missing metadata")
+	}
+
+	var messageMethod string
+	var MMth string
+
+	if len(md["send_Using"]) == 0 || len(md["send_Using"]) > 2 {
+		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
+	}
 
 	file := req.GetContent()
 	data := req.GetDate()
@@ -82,16 +106,55 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 			email := row[5]
 			
 			if pendingPrice != ""{
-				_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email)
+				if contains(md["send_Using"], "email") && ( contains(md["send_Using"], "Bulksms") || contains(md["send_Using"], "EBulksms")) {
+					if contains(md["send_Using"], "EBulksms")  {
+						MMth = "EBulksms"
+					}else {
+						MMth = "Bulksms"
+					}
+					_, err := config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email)
 
-				if err != nil {
-					return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
-				}
+					if err != nil {
+						return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
+					}
 
-				_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone)
+					_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, MMth)
 
-				if err != nil {
-					return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
+					if err != nil {
+						return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
+					}
+				}else {
+					for _, method := range md["send_Using"]{
+						if method != "email" && method != "Bulksms" && method != "EBulksms"{
+							return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
+						}
+
+						messageMethod = method
+					}
+
+					if messageMethod == "email" {
+						_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email)
+
+						if err != nil {
+							return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
+						}
+					}
+				
+					if messageMethod == "Bulksms"{
+						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod)
+
+						if err != nil {
+							return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
+						}
+					}
+
+					if messageMethod == "EBulksms"{
+						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod)
+
+						if err != nil {
+							return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
+						}
+					}
 				}
 			}
 		}
