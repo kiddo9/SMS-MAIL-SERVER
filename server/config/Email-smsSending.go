@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func sendEmail(email string, body bytes.Buffer, subject string)(bool, error){
+func sendEmail(email string, body bytes.Buffer, subject string) (bool, error) {
 	m := gomail.NewMessage()
 	m.SetHeader("From", MailVariables["SMTP_USER"])
 	m.SetHeader("To", email)
@@ -31,15 +31,15 @@ func sendEmail(email string, body bytes.Buffer, subject string)(bool, error){
 
 	err = d.DialAndSend(m)
 
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
-	return false, status.Errorf(codes.Internal, "internal server error %v", err)
+		return false, status.Errorf(codes.Internal, "internal server error %v", err)
 	}
 
 	return true, nil
 }
 
-func SendSmsUsingBulk( receiverNumber string, body string)(bool, error){
+func SendSmsUsingBulk(receiverNumber string, body string) (bool, error) {
 	BULKAPITOKEN := os.Getenv("BULKAPITOKEN")
 
 	requestUrl := fmt.Sprintf("https://www.bulksmsnigeria.com/api/v2/sms/create?api_token=%v&from=%v&to=%v&body=%v", BULKAPITOKEN, "Neo cloud Technologies", receiverNumber, body)
@@ -69,26 +69,25 @@ func SendSmsUsingBulk( receiverNumber string, body string)(bool, error){
 	return true, nil
 }
 
-
-func SendSmsFunction2(receiverNumber string, body string)(bool, error){
+func SendSmsFunction2(receiverNumber string, body string) (bool, error) {
 	EBULKUSERNAMR := os.Getenv("EBULK_USERNAME")
 	EBULKAPIKEY := os.Getenv("EBULKAPIKEY")
 
 	requestUrl := "https://api.ebulksms.com/sendsms.json"
 
 	bodyParameters := map[string]interface{}{
-		"sms": map[string]interface{}{
+		"SMS": map[string]interface{}{
 			"auth": map[string]interface{}{
 				"username": EBULKUSERNAMR,
-				"apikey": EBULKAPIKEY,
+				"apikey":   EBULKAPIKEY,
 			},
 			"message": map[string]interface{}{
-				"sender": "Neo Cloud Technologies",
+				"sender":      "NeoCloud",
 				"messagetext": body,
-				"flash": "0",
+				"flash":       "0",
 			},
 			"recipients": map[string]interface{}{
-				"gsm":map[string]interface{}{
+				"gsm": map[string]interface{}{
 					"msidn": receiverNumber,
 					"msgid": "1",
 				},
@@ -98,6 +97,7 @@ func SendSmsFunction2(receiverNumber string, body string)(bool, error){
 	}
 
 	jsonBody, err := json.MarshalIndent(bodyParameters, "", "")
+	fmt.Println(string(jsonBody))
 
 	if err != nil {
 		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
@@ -109,7 +109,7 @@ func SendSmsFunction2(receiverNumber string, body string)(bool, error){
 		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
 	}
 
-	fmt.Println(resp, resp.Status)
+	fmt.Println(resp)
 	defer resp.Body.Close()
 
 	return true, nil

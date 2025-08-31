@@ -7,6 +7,7 @@ import AuthContextProvider from "./contexts/AuthContext"
 import Home from "./pages/Home"
 import Footer from "./components/Footer"
 import NavBar from "./components/NavBar"
+import Templates from "./pages/Templates"
 
 function App() {
   
@@ -33,6 +34,7 @@ function App() {
               <NavBar/>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/templates" element={<Templates />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </>
