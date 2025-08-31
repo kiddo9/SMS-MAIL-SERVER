@@ -28,7 +28,7 @@ static_resources:
                               allow_origin_string_match:
                                 - prefix: "http://localhost:5173"
                               allow_methods: "POST, GET, OPTIONS"
-                              allow_headers: "content-type,x-grpc-web"
+                              allow_headers: "content-type,x-grpc-web,send_using,recaptcha-token"
                               max_age: "86400"
                               expose_headers: "grpc-status,grpc-message"
                 http_filters:
@@ -43,7 +43,7 @@ static_resources:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
     - name: admin_service
-      connect_timeout: 0.25s
+      connect_timeout: 2s
       type: LOGICAL_DNS
       typed_extension_protocol_options:
         envoy.extensions.upstreams.http.v3.HttpProtocolOptions:

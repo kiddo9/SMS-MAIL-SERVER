@@ -65,7 +65,12 @@ const Home = () => {
       reader.onload = async(event) => {
         const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
         const uint8Array = new Uint8Array(arrayBuffer);
-        const request = await FileUploadClient.fileUpload(fileUploadRequest.create({content: uint8Array, date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}));
+        const request = await FileUploadClient.fileUpload(fileUploadRequest.create({
+          content: uint8Array,
+          date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        }), {
+          meta: { 'send_using': 'EBulksms' } // Example metadata
+        });
 
         const response = request.response;
 

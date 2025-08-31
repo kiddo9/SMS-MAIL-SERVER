@@ -56,7 +56,7 @@ func LoadAdminFiles() {
 	fmt.Println(Admin)
 }
 
-func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest)(*pb.FileUploadResponse, error){
+func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest) (*pb.FileUploadResponse, error) {
 	LoadAdminFiles()
 
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -67,7 +67,9 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var messageMethod string
 	var MMth string
 
-	if len(md["send_Using"]) == 0 || len(md["send_Using"]) > 2 {
+	fmt.Println("Incoming Metadata: ", md["send_using"])
+
+	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
 
@@ -84,7 +86,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 	sheets := readFile.GetSheetList()
 
-	for _, sheet := range sheets{
+	for _, sheet := range sheets {
 		rows, err := readFile.GetRows(sheet)
 
 		if err != nil {
@@ -94,7 +96,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		result[sheet] = rows
 
 		for idx, row := range result[sheet] {
-			
+
 			if idx == 0 {
 				continue
 			}
@@ -104,12 +106,12 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 			phone := row[3]
 			course := row[2]
 			email := row[5]
-			
-			if pendingPrice != ""{
-				if contains(md["send_Using"], "email") && ( contains(md["send_Using"], "Bulksms") || contains(md["send_Using"], "EBulksms")) {
-					if contains(md["send_Using"], "EBulksms")  {
+
+			if pendingPrice != "" {
+				if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")) {
+					if contains(md["send_using"], "EBulksms") {
 						MMth = "EBulksms"
-					}else {
+					} else {
 						MMth = "Bulksms"
 					}
 					_, err := config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email)
@@ -123,9 +125,9 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 					if err != nil {
 						return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
 					}
-				}else {
-					for _, method := range md["send_Using"]{
-						if method != "email" && method != "Bulksms" && method != "EBulksms"{
+				} else {
+					for _, method := range md["send_using"] {
+						if method != "email" && method != "Bulksms" && method != "EBulksms" {
 							return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
 						}
 
@@ -139,8 +141,8 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 							return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
 						}
 					}
-				
-					if messageMethod == "Bulksms"{
+
+					if messageMethod == "Bulksms" {
 						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod)
 
 						if err != nil {
@@ -148,7 +150,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 						}
 					}
 
-					if messageMethod == "EBulksms"{
+					if messageMethod == "EBulksms" {
 						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod)
 
 						if err != nil {
@@ -161,7 +163,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	}
 
 	return &pb.FileUploadResponse{
-		Status: true,
+		Status:  true,
 		Message: "email and sms sent",
 	}, nil
 }
