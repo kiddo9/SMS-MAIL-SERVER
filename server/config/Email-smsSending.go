@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -73,44 +72,14 @@ func SendSmsFunction2(receiverNumber string, body string) (bool, error) {
 	EBULKUSERNAMR := os.Getenv("EBULK_USERNAME")
 	EBULKAPIKEY := os.Getenv("EBULKAPIKEY")
 
-	requestUrl := "https://api.ebulksms.com/sendsms.json"
+	requestUrl := fmt.Sprintf("https://api.ebulksms.com/sendsms?username=%v&apikey=%v&sender=%v&messagetext=%v&flash=0&recipients=%v", EBULKUSERNAMR, EBULKAPIKEY, "NeoCloud", body, receiverNumber)
 
-	bodyParameters := map[string]interface{}{
-		"SMS": map[string]interface{}{
-			"auth": map[string]interface{}{
-				"username": EBULKUSERNAMR,
-				"apikey":   EBULKAPIKEY,
-			},
-			"message": map[string]interface{}{
-				"sender":      "NeoCloud",
-				"messagetext": body,
-				"flash":       "0",
-			},
-			"recipients": map[string]interface{}{
-				"gsm": map[string]interface{}{
-					"msidn": receiverNumber,
-					"msgid": "1",
-				},
-			},
-			"dndsender": 1,
-		},
-	}
-
-	jsonBody, err := json.MarshalIndent(bodyParameters, "", "")
-	fmt.Println(string(jsonBody))
-
-	if err != nil {
-		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
-	}
-
-	resp, err := http.Post(requestUrl, "application/json", bytes.NewBuffer(jsonBody))
+	_, err := http.Get(requestUrl)
+	
 	if err != nil {
 		fmt.Println(err)
 		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
 	}
-
-	fmt.Println(resp)
-	defer resp.Body.Close()
 
 	return true, nil
 }
