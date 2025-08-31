@@ -67,8 +67,6 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var messageMethod string
 	var MMth string
 
-	fmt.Println("Incoming Metadata: ", md["send_using"])
-
 	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
