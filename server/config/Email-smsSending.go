@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -41,11 +42,24 @@ func sendEmail(email string, body bytes.Buffer, subject string) (bool, error) {
 func SendSmsUsingBulk(receiverNumber string, body string) (bool, error) {
 	BULKAPITOKEN := os.Getenv("BULKAPITOKEN")
 
-	requestUrl := fmt.Sprintf("https://www.bulksmsnigeria.com/api/v2/sms/create?api_token=%v&from=%v&to=%v&body=%v", BULKAPITOKEN, "Neocloud_Technologies", receiverNumber, body)
+	BaseUrl := "https://www.bulksmsnigeria.com/api/v2/sms/create"
+	parseUrl, err := url.Parse(BaseUrl)
+
+	if err != nil {
+		return false, status.Errorf(codes.Canceled, "unable to resolve request url")
+	}
+
+	query := parseUrl.Query()
+	query.Set("api_token", BULKAPITOKEN)
+	query.Set("from", "Neocloud Technologies")
+	query.Set("to", receiverNumber)
+	query.Set("body", body)
+
+	parseUrl.RawQuery = query.Encode()
 
 	client := &http.Client{}
 
-	req, err := http.NewRequest("POST", requestUrl, nil)
+	req, err := http.NewRequest("POST", parseUrl.String(), nil)
 
 	if err != nil {
 		fmt.Println(err)
@@ -72,9 +86,23 @@ func SendSmsFunction2(receiverNumber string, body string) (bool, error) {
 	EBULKUSERNAMR := os.Getenv("EBULK_USERNAME")
 	EBULKAPIKEY := os.Getenv("EBULKAPIKEY")
 
-	requestUrl := fmt.Sprintf("https://api.ebulksms.com/sendsms?username=%v&apikey=%v&sender=%v&messagetext=%v&flash=0&recipients=%v", EBULKUSERNAMR, EBULKAPIKEY, "NeoCloud", body, receiverNumber)
+	BaseUrl := "https://api.ebulksms.com/sendsms"
+	parseUrl, err :=  url.Parse(BaseUrl)
 
-	_, err := http.Get(requestUrl)
+	if err != nil {
+		return false, status.Errorf(codes.Canceled, "unable to resolve request url")
+	}
+
+	query := parseUrl.Query()
+	query.Set("username", EBULKUSERNAMR)
+	query.Set("apikey", EBULKAPIKEY)
+	query.Set("sender", "Neo Cloud Technologies")
+	query.Set("messagetext", body)
+	query.Set("recipients", receiverNumber)
+
+	parseUrl.RawQuery = query.Encode()
+
+	_, err = http.Get(parseUrl.String())
 	
 	if err != nil {
 		fmt.Println(err)
