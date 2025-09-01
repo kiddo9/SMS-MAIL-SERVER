@@ -4,13 +4,14 @@ import Editor from "./Editor"
 const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = useState(false)
     const [name, setName] = useState('')
+    const [text, setText] = useState('')
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         setLoader(true)
         e.preventDefault();
         {/*CREATE API GOES HERE */}
         try {
-            console.log(name);
+            console.log(name, text);
         } catch (error) {
             console.log(error);
             
@@ -45,7 +46,8 @@ const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.Se
                             required
                         />
                     </fieldset>
-                    <Editor />
+                    <p className="text-sm mb-4"><strong>Instructions: </strong>{"You can edit the text below to create a custom template, please do not edit or remove the text in '{ {. } }' symbol"}</p>
+                    <Editor text={text} setText={setText} />
                     <button
                         type="submit"
                         className="border-2 mt-2 border-[#6699ff] mb-5 mx-auto text-[#6699ff] hover:bg-blue-500 hover:text-white px-4 py-2 rounded-lg transition duration-300 ease-in cursor-pointer hover:shadow-2xl"
@@ -61,4 +63,4 @@ const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.Se
   )
 }
 
-export default CreateTemplate
+export default CreateTemplate  

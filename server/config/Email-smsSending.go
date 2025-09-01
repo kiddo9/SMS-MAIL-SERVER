@@ -75,8 +75,6 @@ func SendSmsUsingBulk(receiverNumber string, body string) (bool, error) {
 		fmt.Println(err)
 		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
 	}
-
-	fmt.Println(resp, resp.Status)
 	defer resp.Body.Close()
 
 	return true, nil
@@ -87,7 +85,7 @@ func SendSmsFunction2(receiverNumber string, body string) (bool, error) {
 	EBULKAPIKEY := os.Getenv("EBULKAPIKEY")
 
 	BaseUrl := "https://api.ebulksms.com/sendsms"
-	parseUrl, err :=  url.Parse(BaseUrl)
+	parseUrl, err := url.Parse(BaseUrl)
 
 	if err != nil {
 		return false, status.Errorf(codes.Canceled, "unable to resolve request url")
@@ -96,18 +94,21 @@ func SendSmsFunction2(receiverNumber string, body string) (bool, error) {
 	query := parseUrl.Query()
 	query.Set("username", EBULKUSERNAMR)
 	query.Set("apikey", EBULKAPIKEY)
-	query.Set("sender", "Neo Cloud Technologies")
+	query.Set("sender", "NeoCloud")
 	query.Set("messagetext", body)
 	query.Set("recipients", receiverNumber)
 
 	parseUrl.RawQuery = query.Encode()
+	fmt.Println(parseUrl.String())
 
-	_, err = http.Get(parseUrl.String())
-	
+	resp, err := http.Get(parseUrl.String())
+
 	if err != nil {
 		fmt.Println(err)
 		return false, status.Errorf(codes.Canceled, "unable to complete your request %v", err)
 	}
+
+	fmt.Println(resp)
 
 	return true, nil
 }

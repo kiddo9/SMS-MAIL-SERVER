@@ -43,7 +43,7 @@ static_resources:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
     - name: admin_service
-      connect_timeout: 2s
+      connect_timeout: 50s
       type: LOGICAL_DNS
       typed_extension_protocol_options:
         envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
