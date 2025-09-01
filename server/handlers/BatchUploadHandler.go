@@ -30,11 +30,11 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
-var datas []byte
-var body []structures.AdminStructs
-var Admin structures.AdminStructs
+func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest) (*pb.FileUploadResponse, error) {
+	var datas []byte
+	var body []structures.AdminStructs
+	var Admin structures.AdminStructs
 
-func LoadAdminFiles() {
 	_, err := os.Open(fileName)
 
 	if err != nil {
@@ -54,10 +54,6 @@ func LoadAdminFiles() {
 
 	body[0] = Admin
 	fmt.Println(Admin)
-}
-
-func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest) (*pb.FileUploadResponse, error) {
-	LoadAdminFiles()
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

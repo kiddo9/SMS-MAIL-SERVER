@@ -41,7 +41,7 @@ func sendEmail(email string, body bytes.Buffer, subject string) (bool, error) {
 func SendSmsUsingBulk(receiverNumber string, body string) (bool, error) {
 	BULKAPITOKEN := os.Getenv("BULKAPITOKEN")
 
-	requestUrl := fmt.Sprintf("https://www.bulksmsnigeria.com/api/v2/sms/create?api_token=%v&from=%v&to=%v&body=%v", BULKAPITOKEN, "Neo cloud Technologies", receiverNumber, body)
+	requestUrl := fmt.Sprintf("https://www.bulksmsnigeria.com/api/v2/sms/create?api_token=%v&from=%v&to=%v&body=%v", BULKAPITOKEN, "Neocloud_Technologies", receiverNumber, body)
 
 	client := &http.Client{}
 
