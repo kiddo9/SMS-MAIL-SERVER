@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-
 var MailVariables map[string]string
 var SmsVariables map[string]string
 
@@ -29,30 +28,29 @@ func init() {
 		"SMTP_PASSWORD": os.Getenv("EMAIL_PASSWORD"),
 	}
 
-		SmsVariables = map[string]string{
+	SmsVariables = map[string]string{
 		"SMS_API_KEY": os.Getenv(""),
 		"SMS_API_URL": os.Getenv(""),
 	}
 }
 
-
-func AuthenticationMailling(email string, otp string) (bool, error){
+func AuthenticationMailling(email string, otp string) (bool, error) {
 	tmpl, err := template.New("otpEmail").Parse(templates.OTPEmail)
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
 	info := map[string]string{
-		"Name": "Admin or Oracle",
-		"EmailContent": "This is your one time password and will expire in 3 minutes",
-		"OTP": otp,
+		"Name":          "Admin or Oracle",
+		"EmailContent":  "This is your one time password and will expire in 3 minutes",
+		"OTP":           otp,
 		"ExpiryMinutes": "3",
 	}
 
-	 var body bytes.Buffer
-    if err := tmpl.Execute(&body, info); err != nil {
-        panic(err)
-    }
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, info); err != nil {
+		panic(err)
+	}
 
 	_, err = sendEmail(email, body, "OTP Verification")
 	if err != nil {
@@ -62,23 +60,22 @@ func AuthenticationMailling(email string, otp string) (bool, error){
 	return true, nil
 }
 
-
-func BulkEmail(name string, pendingPrice string, course string, Date string, emailAddress string, phoneNumber string, senderEmail string)(bool, error){
+func BulkEmail(name string, pendingPrice string, course string, Date string, emailAddress string, phoneNumber string, senderEmail string) (bool, error) {
 	tmp, err := template.New("BatchUploadEmail").Parse(templates.EmailTemplate1)
 
 	if err != nil {
-		return false, status.Errorf(codes.Internal, "could not resolve template %v",err)
+		return false, status.Errorf(codes.Internal, "could not resolve template %v", err)
 	}
 
 	price := fmt.Sprintf("%v", pendingPrice)
 	number := fmt.Sprintf("%v", phoneNumber)
 
 	Datas := map[string]string{
-		"Name": name,
+		"Name":         name,
 		"PendingPrice": price,
-		"course": course,
-		"Date": Date,
-		"phoneNumber": number,
+		"course":       course,
+		"Date":         Date,
+		"phoneNumber":  number,
 		"EmailAddress": senderEmail,
 	}
 
@@ -96,7 +93,7 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 	return true, nil
 }
 
-func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string, method string)(bool, error){
+func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string, method string) (bool, error) {
 	tmp, err := template.New("BatchUploadSMS").Parse(templates.SmsTemp)
 
 	if err != nil {
@@ -107,11 +104,11 @@ func BulkSms(name string, pendingPrice string, course string, Date string, phone
 	number := fmt.Sprintf("%v", phoneNumber)
 
 	Datas := map[string]string{
-		"Name": name,
+		"Name":         name,
 		"PendingPrice": price,
-		"course": course,
-		"Date": Date,
-		"phoneNumber": number,
+		"course":       course,
+		"Date":         Date,
+		"phoneNumber":  number,
 		"EmailAddress": senderEmail,
 	}
 
@@ -131,14 +128,12 @@ func BulkSms(name string, pendingPrice string, course string, Date string, phone
 	}
 
 	if method == "EBulksms" {
-		resp2, err := SendSmsFunction2(receverNumber, body.String())
+		_, err := SendSmsFunction2(receverNumber, body.String())
 
 		if err != nil {
 			return false, status.Errorf(codes.Aborted, "process could not be completed. seems both sms servers are down")
 		}
-
-		fmt.Println(resp2)
 	}
-	
+
 	return true, nil
 }
