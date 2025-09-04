@@ -16,7 +16,6 @@ import (
 
 var MailVariables map[string]string
 var SmsVariables map[string]string
-var TemplateContent string = ``
 
 func init() {
 	err := godotenv.Load(".env")
@@ -37,24 +36,26 @@ func init() {
 	}
 }
 
-func LoadTemplate(templateType string, id int) error{
+func LoadTemplate(templateType string, id int)(string, error){
+	var TemplateContent string 
+
 	_, err := os.Open("storage/Templates.json")
 
 	if err != nil {
-		return status.Errorf(codes.Internal, "Internal Server Error")
+		return "error", status.Errorf(codes.Internal, "Internal Server Error")
 	}
 
 	data, err := os.ReadFile("storage/Templates.json")
 
 	if err != nil {
-		return status.Errorf(codes.Internal, "Internal Server Error")
+		return "error", status.Errorf(codes.Internal, "Internal Server Error")
 	}
 
 	var Array structures.TemplateStruct
 	err = json.Unmarshal(data, &Array)
 
 	if err != nil {
-		return status.Errorf(codes.Internal, "Internal Server Error")
+		return "error", status.Errorf(codes.Internal, "Internal Server Error")
 	}
 
 	if templateType == "email" {
@@ -63,8 +64,7 @@ func LoadTemplate(templateType string, id int) error{
 		for _, emailTemp := range EmailTemplateList {
 			if emailTemp.ID == id {
 				TemplateContent = emailTemp.TemplateContent
-				fmt.Println(TemplateContent)
-				break
+				return TemplateContent, nil
 			}
 		}
 	}else if templateType == "sms" {
@@ -72,16 +72,15 @@ func LoadTemplate(templateType string, id int) error{
 
 		for _, smsTemp := range SmsTemplateList {
 			if smsTemp.ID == id {
-				TemplateContent = smsTemp.TemplateContent
-				fmt.Println(smsTemp.TemplateContent)
-				break
+				 TemplateContent = smsTemp.TemplateContent
+				return TemplateContent, nil
 			}
 		}
 	}else{
-		return status.Errorf(codes.InvalidArgument, "Invalid template type")
+		return "error", status.Errorf(codes.InvalidArgument, "Invalid template type")
 	}
 
-	return nil
+	return "", nil
 }
 
 func AuthenticationMailling(email string, otp string) (bool, error) {
@@ -111,16 +110,18 @@ func AuthenticationMailling(email string, otp string) (bool, error) {
 }
 
 func BulkEmail(name string, pendingPrice string, course string, Date string, emailAddress string, phoneNumber string, senderEmail string, tempType string, tempId int) (bool, error) {
-	 err := LoadTemplate(tempType, tempId)
+	 content, err := LoadTemplate(tempType, tempId)
+	 fmt.Println(content)
 
-	 if err != nil {
+	 if err != nil || content == "error" {
+		fmt.Println(err)
 		return false, status.Errorf(codes.Internal, "could not resolve template %v", err)
 	 }
 
-	tmp, err := template.New("BatchUploadEmail").Parse(TemplateContent)
+	tmp, err := template.New("BatchUploadEmail").Parse(content)
 
 	if err != nil {
-		return false, status.Errorf(codes.Internal, "could not resolve template %v", err)
+		return false, status.Errorf(codes.Internal, "could not parse template %v", err)
 	}
 
 	price := fmt.Sprintf("%v", pendingPrice)
