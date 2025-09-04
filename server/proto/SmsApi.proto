@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package admin;
+
+option go_package = "message/proto";
+
+message EbulkSms {
+
+}
+
+message BulkSms {
+
+}
+
+service SmsServices {
+    rpc EbulkSmsWallet(EbulkSms) returns (stream EbulkSms){}
+    rpc BulkSmsWallet(BulkSms) returns (stream BulkSms){}
+}

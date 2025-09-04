@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 
 	"github.com/kiddo9/SMS-MAIL-SERVER/config"
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
@@ -62,6 +63,21 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 	var messageMethod string
 	var MMth string
+	var EmailId []string = md["emailId"]
+	var emailIdStr string
+
+	
+	if len(EmailId) > 0 {
+		emailIdStr = EmailId[0]
+	} else {
+		return nil, status.Errorf(codes.InvalidArgument, "missing emailId")
+	}
+
+	Id, err := strconv.Atoi(emailIdStr)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
@@ -108,7 +124,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 					} else {
 						MMth = "Bulksms"
 					}
-					_, err := config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email)
+					_, err := config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email, "email", Id)
 
 					if err != nil {
 						return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
@@ -129,7 +145,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 					}
 
 					if messageMethod == "email" {
-						_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email)
+						_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email,messageMethod, Id)
 
 						if err != nil {
 							return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")

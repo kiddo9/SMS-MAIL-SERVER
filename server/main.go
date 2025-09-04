@@ -34,6 +34,7 @@ func main() {
 
 	pb.RegisterAdminServiceServer(grpcServer, &handlers.AdminHandler{})
 	pb.RegisterFileUploadServicesServer(grpcServer, &handlers.FileUploadStruct{})
+	pb.RegisterTemplateServicesServer(grpcServer, &handlers.Temp{})
 	if err := grpcServer.Serve(lis); err != nil {
 		panic(err)
 	}
