@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package Templates;
+
+option go_package = "message/proto";
+
+message Template {
+    string id = 1;
+    string TemplateName = 2;
+    string TemplateContent = 3;
+    string Date = 4;
+}
+
+message SmsTemplate {
+    string id = 1;
+    string SmsTemplateName = 2;
+    string SmsTemplateContent = 3;
+    string Date = 4;
+}
+
+message Response {
+    bool Status = 1;
+    string Message = 2;
+}
+
+message TemplateRequest {
+    string TemplateName = 1;
+    string TemplateContent = 2;
+    string Date = 3;
+}
+
+message SmsTemplateRequest {
+    string SmsTemplateName = 1;
+    string SmsTemplateContent = 2;
+    string Date = 3;
+}
+
+message GetATemplateRequest {
+    string id = 1;
+}
+
+message GetATemplateResponse {
+    Template template = 1;
+}
+
+message GetAnSmsTemplateRequest {
+    string id = 1;
+}
+
+message GetAnSmsTemplateResponse {
+    SmsTemplate smsTemplate = 1;
+}
+
+message TemplateEditRequest {
+   Template template = 1;
+}
+
+message SmsTemplateEditRequest {
+   SmsTemplate smstemplate = 1;
+}
+
+message TemplateFetchRequest {
+  
+}
+message TemplateFetchResponse {
+  
+}
+
+service TemplateServices {
+    rpc CreateEmailTemplate(TemplateRequest) returns (Response) {}
+    rpc CreateSmsTemplate(SmsTemplateRequest) returns (Response) {}
+    rpc AllTemplates (TemplateFetchRequest) returns (stream TemplateFetchResponse){}
+    rpc EditEmailTemplate(TemplateEditRequest) returns (Response) {}
+    rpc EditSmsTemplate(SmsTemplateEditRequest) returns (Response) {}
+    rpc GetEmailTemplateById(GetATemplateRequest) returns (GetATemplateResponse) {}
+    rpc GetSmsTemplateById(GetAnSmsTemplateRequest) returns (GetAnSmsTemplateResponse) {}
+}

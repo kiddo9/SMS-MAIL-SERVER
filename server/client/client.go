@@ -15,12 +15,14 @@ func main() {
 	conn, _ := grpc.NewClient("localhost:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	defer conn.Close()
 
-	client := pb.NewAdminServiceClient(conn)
+	client := pb.NewTemplateServicesClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	resp, err := client.LoginAdmin(ctx, &pb.OtpRequest{
-		Email: "dkido913@gmail.com",
+	resp, err := client.CreateSmsTemplate(ctx, &pb.SmsTemplateRequest{
+		SmsTemplateName: "gvgvhh",
+		SmsTemplateContent: "fcygviycryxtfcvuhutcrc",
+		Date: time.Now().Format(time.RFC3339),
 	})
 
 	if err != nil {
