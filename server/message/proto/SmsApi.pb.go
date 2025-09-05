@@ -93,6 +93,94 @@ func (*BulkSms) Descriptor() ([]byte, []int) {
 	return file_proto_SmsApi_proto_rawDescGZIP(), []int{1}
 }
 
+type EbulkSmsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Response      string                 `protobuf:"bytes,1,opt,name=response,proto3" json:"response,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EbulkSmsResponse) Reset() {
+	*x = EbulkSmsResponse{}
+	mi := &file_proto_SmsApi_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EbulkSmsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EbulkSmsResponse) ProtoMessage() {}
+
+func (x *EbulkSmsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_SmsApi_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EbulkSmsResponse.ProtoReflect.Descriptor instead.
+func (*EbulkSmsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_SmsApi_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *EbulkSmsResponse) GetResponse() string {
+	if x != nil {
+		return x.Response
+	}
+	return ""
+}
+
+type BulkSmsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Response      string                 `protobuf:"bytes,1,opt,name=response,proto3" json:"response,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BulkSmsResponse) Reset() {
+	*x = BulkSmsResponse{}
+	mi := &file_proto_SmsApi_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BulkSmsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BulkSmsResponse) ProtoMessage() {}
+
+func (x *BulkSmsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_SmsApi_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BulkSmsResponse.ProtoReflect.Descriptor instead.
+func (*BulkSmsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_SmsApi_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *BulkSmsResponse) GetResponse() string {
+	if x != nil {
+		return x.Response
+	}
+	return ""
+}
+
 var File_proto_SmsApi_proto protoreflect.FileDescriptor
 
 const file_proto_SmsApi_proto_rawDesc = "" +
@@ -100,10 +188,14 @@ const file_proto_SmsApi_proto_rawDesc = "" +
 	"\x12proto/SmsApi.proto\x12\x05admin\"\n" +
 	"\n" +
 	"\bEbulkSms\"\t\n" +
-	"\aBulkSms2z\n" +
-	"\vSmsServices\x126\n" +
-	"\x0eEbulkSmsWallet\x12\x0f.admin.EbulkSms\x1a\x0f.admin.EbulkSms\"\x000\x01\x123\n" +
-	"\rBulkSmsWallet\x12\x0e.admin.BulkSms\x1a\x0e.admin.BulkSms\"\x000\x01B\x0fZ\rmessage/protob\x06proto3"
+	"\aBulkSms\".\n" +
+	"\x10EbulkSmsResponse\x12\x1a\n" +
+	"\bresponse\x18\x01 \x01(\tR\bresponse\"-\n" +
+	"\x0fBulkSmsResponse\x12\x1a\n" +
+	"\bresponse\x18\x01 \x01(\tR\bresponse2\x8a\x01\n" +
+	"\vSmsServices\x12>\n" +
+	"\x0eEbulkSmsWallet\x12\x0f.admin.EbulkSms\x1a\x17.admin.EbulkSmsResponse\"\x000\x01\x12;\n" +
+	"\rBulkSmsWallet\x12\x0e.admin.BulkSms\x1a\x16.admin.BulkSmsResponse\"\x000\x01B\x0fZ\rmessage/protob\x06proto3"
 
 var (
 	file_proto_SmsApi_proto_rawDescOnce sync.Once
@@ -117,16 +209,18 @@ func file_proto_SmsApi_proto_rawDescGZIP() []byte {
 	return file_proto_SmsApi_proto_rawDescData
 }
 
-var file_proto_SmsApi_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_SmsApi_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_SmsApi_proto_goTypes = []any{
-	(*EbulkSms)(nil), // 0: admin.EbulkSms
-	(*BulkSms)(nil),  // 1: admin.BulkSms
+	(*EbulkSms)(nil),         // 0: admin.EbulkSms
+	(*BulkSms)(nil),          // 1: admin.BulkSms
+	(*EbulkSmsResponse)(nil), // 2: admin.EbulkSmsResponse
+	(*BulkSmsResponse)(nil),  // 3: admin.BulkSmsResponse
 }
 var file_proto_SmsApi_proto_depIdxs = []int32{
 	0, // 0: admin.SmsServices.EbulkSmsWallet:input_type -> admin.EbulkSms
 	1, // 1: admin.SmsServices.BulkSmsWallet:input_type -> admin.BulkSms
-	0, // 2: admin.SmsServices.EbulkSmsWallet:output_type -> admin.EbulkSms
-	1, // 3: admin.SmsServices.BulkSmsWallet:output_type -> admin.BulkSms
+	2, // 2: admin.SmsServices.EbulkSmsWallet:output_type -> admin.EbulkSmsResponse
+	3, // 3: admin.SmsServices.BulkSmsWallet:output_type -> admin.BulkSmsResponse
 	2, // [2:4] is the sub-list for method output_type
 	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -145,7 +239,7 @@ func file_proto_SmsApi_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_SmsApi_proto_rawDesc), len(file_proto_SmsApi_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

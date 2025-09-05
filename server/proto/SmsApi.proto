@@ -5,14 +5,19 @@ package admin;
 option go_package = "message/proto";
 
 message EbulkSms {
-
 }
 
 message BulkSms {
+}
+message EbulkSmsResponse {
+    string response = 1;
+}
 
+message BulkSmsResponse {
+    string response = 1;
 }
 
 service SmsServices {
-    rpc EbulkSmsWallet(EbulkSms) returns (stream EbulkSms){}
-    rpc BulkSmsWallet(BulkSms) returns (stream BulkSms){}
+    rpc EbulkSmsWallet(EbulkSms) returns (stream EbulkSmsResponse){}
+    rpc BulkSmsWallet(BulkSms) returns (stream BulkSmsResponse){}
 }

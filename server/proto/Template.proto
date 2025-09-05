@@ -63,7 +63,8 @@ message TemplateFetchRequest {
   
 }
 message TemplateFetchResponse {
-  
+    Template emailTemplate = 1;
+    SmsTemplate smsTemplate = 2;
 }
 
 service TemplateServices {

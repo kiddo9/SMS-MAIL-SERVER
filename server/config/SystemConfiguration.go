@@ -111,7 +111,6 @@ func AuthenticationMailling(email string, otp string) (bool, error) {
 
 func BulkEmail(name string, pendingPrice string, course string, Date string, emailAddress string, phoneNumber string, senderEmail string, tempType string, tempId int) (bool, error) {
 	 content, err := LoadTemplate(tempType, tempId)
-	 fmt.Println(content)
 
 	 if err != nil || content == "error" {
 		fmt.Println(err)
@@ -150,8 +149,14 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 	return true, nil
 }
 
-func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string, method string) (bool, error) {
-	tmp, err := template.New("BatchUploadSMS").Parse(templates.SmsTemp)
+func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string, method string, templateType string, tempId int) (bool, error) {
+	 content, err := LoadTemplate(templateType, tempId)
+
+	 if err != nil || content == "error" {
+		return false, status.Errorf(codes.Internal, "could not resolve template %v", err)
+	 }
+
+	tmp, err := template.New("BatchUploadSMS").Parse(content)
 
 	if err != nil {
 		panic(err)
