@@ -631,6 +631,8 @@ func (*TemplateFetchRequest) Descriptor() ([]byte, []int) {
 
 type TemplateFetchResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	EmailTemplate *Template              `protobuf:"bytes,1,opt,name=emailTemplate,proto3" json:"emailTemplate,omitempty"`
+	SmsTemplate   *SmsTemplate           `protobuf:"bytes,2,opt,name=smsTemplate,proto3" json:"smsTemplate,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -663,6 +665,20 @@ func (x *TemplateFetchResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use TemplateFetchResponse.ProtoReflect.Descriptor instead.
 func (*TemplateFetchResponse) Descriptor() ([]byte, []int) {
 	return file_proto_Template_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *TemplateFetchResponse) GetEmailTemplate() *Template {
+	if x != nil {
+		return x.EmailTemplate
+	}
+	return nil
+}
+
+func (x *TemplateFetchResponse) GetSmsTemplate() *SmsTemplate {
+	if x != nil {
+		return x.SmsTemplate
+	}
+	return nil
 }
 
 var File_proto_Template_proto protoreflect.FileDescriptor
@@ -703,8 +719,10 @@ const file_proto_Template_proto_rawDesc = "" +
 	"\btemplate\x18\x01 \x01(\v2\x13.Templates.TemplateR\btemplate\"R\n" +
 	"\x16SmsTemplateEditRequest\x128\n" +
 	"\vsmstemplate\x18\x01 \x01(\v2\x16.Templates.SmsTemplateR\vsmstemplate\"\x16\n" +
-	"\x14TemplateFetchRequest\"\x17\n" +
-	"\x15TemplateFetchResponse2\xd3\x04\n" +
+	"\x14TemplateFetchRequest\"\x8c\x01\n" +
+	"\x15TemplateFetchResponse\x129\n" +
+	"\remailTemplate\x18\x01 \x01(\v2\x13.Templates.TemplateR\remailTemplate\x128\n" +
+	"\vsmsTemplate\x18\x02 \x01(\v2\x16.Templates.SmsTemplateR\vsmsTemplate2\xd3\x04\n" +
 	"\x10TemplateServices\x12H\n" +
 	"\x13CreateEmailTemplate\x12\x1a.Templates.TemplateRequest\x1a\x13.Templates.Response\"\x00\x12I\n" +
 	"\x11CreateSmsTemplate\x12\x1d.Templates.SmsTemplateRequest\x1a\x13.Templates.Response\"\x00\x12U\n" +
@@ -747,25 +765,27 @@ var file_proto_Template_proto_depIdxs = []int32{
 	1,  // 1: Templates.GetAnSmsTemplateResponse.smsTemplate:type_name -> Templates.SmsTemplate
 	0,  // 2: Templates.TemplateEditRequest.template:type_name -> Templates.Template
 	1,  // 3: Templates.SmsTemplateEditRequest.smstemplate:type_name -> Templates.SmsTemplate
-	3,  // 4: Templates.TemplateServices.CreateEmailTemplate:input_type -> Templates.TemplateRequest
-	4,  // 5: Templates.TemplateServices.CreateSmsTemplate:input_type -> Templates.SmsTemplateRequest
-	11, // 6: Templates.TemplateServices.AllTemplates:input_type -> Templates.TemplateFetchRequest
-	9,  // 7: Templates.TemplateServices.EditEmailTemplate:input_type -> Templates.TemplateEditRequest
-	10, // 8: Templates.TemplateServices.EditSmsTemplate:input_type -> Templates.SmsTemplateEditRequest
-	5,  // 9: Templates.TemplateServices.GetEmailTemplateById:input_type -> Templates.GetATemplateRequest
-	7,  // 10: Templates.TemplateServices.GetSmsTemplateById:input_type -> Templates.GetAnSmsTemplateRequest
-	2,  // 11: Templates.TemplateServices.CreateEmailTemplate:output_type -> Templates.Response
-	2,  // 12: Templates.TemplateServices.CreateSmsTemplate:output_type -> Templates.Response
-	12, // 13: Templates.TemplateServices.AllTemplates:output_type -> Templates.TemplateFetchResponse
-	2,  // 14: Templates.TemplateServices.EditEmailTemplate:output_type -> Templates.Response
-	2,  // 15: Templates.TemplateServices.EditSmsTemplate:output_type -> Templates.Response
-	6,  // 16: Templates.TemplateServices.GetEmailTemplateById:output_type -> Templates.GetATemplateResponse
-	8,  // 17: Templates.TemplateServices.GetSmsTemplateById:output_type -> Templates.GetAnSmsTemplateResponse
-	11, // [11:18] is the sub-list for method output_type
-	4,  // [4:11] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	0,  // 4: Templates.TemplateFetchResponse.emailTemplate:type_name -> Templates.Template
+	1,  // 5: Templates.TemplateFetchResponse.smsTemplate:type_name -> Templates.SmsTemplate
+	3,  // 6: Templates.TemplateServices.CreateEmailTemplate:input_type -> Templates.TemplateRequest
+	4,  // 7: Templates.TemplateServices.CreateSmsTemplate:input_type -> Templates.SmsTemplateRequest
+	11, // 8: Templates.TemplateServices.AllTemplates:input_type -> Templates.TemplateFetchRequest
+	9,  // 9: Templates.TemplateServices.EditEmailTemplate:input_type -> Templates.TemplateEditRequest
+	10, // 10: Templates.TemplateServices.EditSmsTemplate:input_type -> Templates.SmsTemplateEditRequest
+	5,  // 11: Templates.TemplateServices.GetEmailTemplateById:input_type -> Templates.GetATemplateRequest
+	7,  // 12: Templates.TemplateServices.GetSmsTemplateById:input_type -> Templates.GetAnSmsTemplateRequest
+	2,  // 13: Templates.TemplateServices.CreateEmailTemplate:output_type -> Templates.Response
+	2,  // 14: Templates.TemplateServices.CreateSmsTemplate:output_type -> Templates.Response
+	12, // 15: Templates.TemplateServices.AllTemplates:output_type -> Templates.TemplateFetchResponse
+	2,  // 16: Templates.TemplateServices.EditEmailTemplate:output_type -> Templates.Response
+	2,  // 17: Templates.TemplateServices.EditSmsTemplate:output_type -> Templates.Response
+	6,  // 18: Templates.TemplateServices.GetEmailTemplateById:output_type -> Templates.GetATemplateResponse
+	8,  // 19: Templates.TemplateServices.GetSmsTemplateById:output_type -> Templates.GetAnSmsTemplateResponse
+	13, // [13:20] is the sub-list for method output_type
+	6,  // [6:13] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_proto_Template_proto_init() }

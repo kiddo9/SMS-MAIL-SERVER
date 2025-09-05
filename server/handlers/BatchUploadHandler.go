@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -54,7 +53,6 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	}
 
 	body[0] = Admin
-	fmt.Println(Admin)
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -64,16 +62,26 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var messageMethod string
 	var MMth string
 	var EmailId []string = md["emailid"]
+	var smsId []string = md["smsid"]
 	var emailIdStr string
+	var smsIdStr string
+	var Message string
 
 	
-	if len(EmailId) > 0 {
-		emailIdStr = EmailId[0]
-	} else {
-		return nil, status.Errorf(codes.InvalidArgument, "missing emailId")
-	}
+	if len(EmailId) == 0 && len(EmailId) > 2 && len(smsId) == 0 && len(smsId) > 2 {
+		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
+	} 
+
+	emailIdStr = EmailId[0]
+	smsIdStr = smsId[0]
 
 	Id, err := strconv.Atoi(emailIdStr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	SmsId, err := strconv.Atoi(smsIdStr)
 
 	if err != nil {
 		return nil, err
@@ -130,11 +138,13 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 						return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
 					}
 
-					_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, MMth)
+					_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, MMth, "sms", SmsId)
 
 					if err != nil {
 						return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
 					}
+
+					Message = "email and sms sent"
 				} else {
 					for _, method := range md["send_using"] {
 						if method != "email" && method != "Bulksms" && method != "EBulksms" {
@@ -150,22 +160,28 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 						if err != nil {
 							return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
 						}
+
+						Message = "email sent"
 					}
 
 					if messageMethod == "Bulksms" {
-						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod)
+						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod, "sms", SmsId)
 
 						if err != nil {
 							return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
 						}
+
+						Message = "sms sent"
 					}
 
 					if messageMethod == "EBulksms" {
-						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod)
+						_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod, "sms", SmsId)
 
 						if err != nil {
 							return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
 						}
+
+						Message = "sms sent"
 					}
 				}
 			}
@@ -174,6 +190,6 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 	return &pb.FileUploadResponse{
 		Status:  true,
-		Message: "email and sms sent",
+		Message: Message,
 	}, nil
 }

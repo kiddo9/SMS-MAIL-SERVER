@@ -27,8 +27,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SmsServicesClient interface {
-	EbulkSmsWallet(ctx context.Context, in *EbulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EbulkSms], error)
-	BulkSmsWallet(ctx context.Context, in *BulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BulkSms], error)
+	EbulkSmsWallet(ctx context.Context, in *EbulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EbulkSmsResponse], error)
+	BulkSmsWallet(ctx context.Context, in *BulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BulkSmsResponse], error)
 }
 
 type smsServicesClient struct {
@@ -39,13 +39,13 @@ func NewSmsServicesClient(cc grpc.ClientConnInterface) SmsServicesClient {
 	return &smsServicesClient{cc}
 }
 
-func (c *smsServicesClient) EbulkSmsWallet(ctx context.Context, in *EbulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EbulkSms], error) {
+func (c *smsServicesClient) EbulkSmsWallet(ctx context.Context, in *EbulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[EbulkSmsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &SmsServices_ServiceDesc.Streams[0], SmsServices_EbulkSmsWallet_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[EbulkSms, EbulkSms]{ClientStream: stream}
+	x := &grpc.GenericClientStream[EbulkSms, EbulkSmsResponse]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -56,15 +56,15 @@ func (c *smsServicesClient) EbulkSmsWallet(ctx context.Context, in *EbulkSms, op
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type SmsServices_EbulkSmsWalletClient = grpc.ServerStreamingClient[EbulkSms]
+type SmsServices_EbulkSmsWalletClient = grpc.ServerStreamingClient[EbulkSmsResponse]
 
-func (c *smsServicesClient) BulkSmsWallet(ctx context.Context, in *BulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BulkSms], error) {
+func (c *smsServicesClient) BulkSmsWallet(ctx context.Context, in *BulkSms, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BulkSmsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &SmsServices_ServiceDesc.Streams[1], SmsServices_BulkSmsWallet_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[BulkSms, BulkSms]{ClientStream: stream}
+	x := &grpc.GenericClientStream[BulkSms, BulkSmsResponse]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -75,14 +75,14 @@ func (c *smsServicesClient) BulkSmsWallet(ctx context.Context, in *BulkSms, opts
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type SmsServices_BulkSmsWalletClient = grpc.ServerStreamingClient[BulkSms]
+type SmsServices_BulkSmsWalletClient = grpc.ServerStreamingClient[BulkSmsResponse]
 
 // SmsServicesServer is the server API for SmsServices service.
 // All implementations must embed UnimplementedSmsServicesServer
 // for forward compatibility.
 type SmsServicesServer interface {
-	EbulkSmsWallet(*EbulkSms, grpc.ServerStreamingServer[EbulkSms]) error
-	BulkSmsWallet(*BulkSms, grpc.ServerStreamingServer[BulkSms]) error
+	EbulkSmsWallet(*EbulkSms, grpc.ServerStreamingServer[EbulkSmsResponse]) error
+	BulkSmsWallet(*BulkSms, grpc.ServerStreamingServer[BulkSmsResponse]) error
 	mustEmbedUnimplementedSmsServicesServer()
 }
 
@@ -93,10 +93,10 @@ type SmsServicesServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSmsServicesServer struct{}
 
-func (UnimplementedSmsServicesServer) EbulkSmsWallet(*EbulkSms, grpc.ServerStreamingServer[EbulkSms]) error {
+func (UnimplementedSmsServicesServer) EbulkSmsWallet(*EbulkSms, grpc.ServerStreamingServer[EbulkSmsResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method EbulkSmsWallet not implemented")
 }
-func (UnimplementedSmsServicesServer) BulkSmsWallet(*BulkSms, grpc.ServerStreamingServer[BulkSms]) error {
+func (UnimplementedSmsServicesServer) BulkSmsWallet(*BulkSms, grpc.ServerStreamingServer[BulkSmsResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method BulkSmsWallet not implemented")
 }
 func (UnimplementedSmsServicesServer) mustEmbedUnimplementedSmsServicesServer() {}
@@ -125,22 +125,22 @@ func _SmsServices_EbulkSmsWallet_Handler(srv interface{}, stream grpc.ServerStre
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(SmsServicesServer).EbulkSmsWallet(m, &grpc.GenericServerStream[EbulkSms, EbulkSms]{ServerStream: stream})
+	return srv.(SmsServicesServer).EbulkSmsWallet(m, &grpc.GenericServerStream[EbulkSms, EbulkSmsResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type SmsServices_EbulkSmsWalletServer = grpc.ServerStreamingServer[EbulkSms]
+type SmsServices_EbulkSmsWalletServer = grpc.ServerStreamingServer[EbulkSmsResponse]
 
 func _SmsServices_BulkSmsWallet_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(BulkSms)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(SmsServicesServer).BulkSmsWallet(m, &grpc.GenericServerStream[BulkSms, BulkSms]{ServerStream: stream})
+	return srv.(SmsServicesServer).BulkSmsWallet(m, &grpc.GenericServerStream[BulkSms, BulkSmsResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type SmsServices_BulkSmsWalletServer = grpc.ServerStreamingServer[BulkSms]
+type SmsServices_BulkSmsWalletServer = grpc.ServerStreamingServer[BulkSmsResponse]
 
 // SmsServices_ServiceDesc is the grpc.ServiceDesc for SmsServices service.
 // It's only intended for direct use with grpc.RegisterService,
