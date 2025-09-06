@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import SMSAPIClient from '../lib/smsApiClient';
-import {BulkSms, EbulkSms} from '../proto/SmsApi'
 import { toast } from "react-toastify";
 import CountUp from "react-countup";
 
@@ -15,17 +14,25 @@ const SMSBalances = () => {
     useEffect(() => {
         const fetchBalances = async () => {
             try {
-                const ebulkStream = SMSAPIClient.ebulkSmsWallet(EbulkSms.create());
+                const ebulkStream = SMSAPIClient.ebulkSmsWallet({});
                 for await (const response of ebulkStream.responses) {
-                    console.log(response);
+                    // console.log(response);
+                    if(isNaN(Number(response.response))){
+                        toast.warning("EBulk SMS wallet balance is not available. Please notify the service administrator.");
+                    };
                     setData(prevData => ({
                         ...prevData,
                         ebulk: response.response
                     }));
                 }
-                const bulkStream = SMSAPIClient.bulkSmsWallet(BulkSms.create({}));
+                const bulkStream = SMSAPIClient.bulkSmsWallet({});
                 for await (const response of bulkStream.responses) {
-                    console.log(response);
+                    // console.log(response);
+                    if(isNaN(Number(response.response))){
+                        toast.warning("Bulk SMS NG wallet balance is not available. Please notify the service administrator.", {
+                            
+                        });
+                    };
                     setData(prevData => ({
                         ...prevData,
                         bulk: response.response

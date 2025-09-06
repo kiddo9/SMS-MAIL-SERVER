@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle , X, AlertCircle,} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import FileUploadClient from '../lib/fileUploadClient';
-import {fileUploadRequest} from '../proto/FileUpload'
 import Hero from '../components/Hero';
 import { toast } from 'react-toastify';
 
@@ -68,10 +67,10 @@ const Home = () => {
         try {
           const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
           const uint8Array = new Uint8Array(arrayBuffer);
-          const request = await FileUploadClient.fileUpload(fileUploadRequest.create({
+          const request = await FileUploadClient.fileUpload({
             content: uint8Array,
-            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-          }), {
+            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toString()
+          }, {
             meta: { 
               'send_using': 'email',
               'emailid': ["1"]
