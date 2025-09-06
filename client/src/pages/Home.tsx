@@ -1,14 +1,16 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, MessageSquare, CheckCircle, AlertCircle, X, NotepadText} from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle , X, AlertCircle,} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import FileUploadClient from '../lib/fileUploadClient';
 import {fileUploadRequest} from '../proto/FileUpload'
+import Hero from '../components/Hero';
+import { toast } from 'react-toastify';
 
 const Home = () => {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<string | null>(null); // 'success', 'error', null
+  const [uploadStatus, setUploadStatus] = useState<'success' | 'error' | null>(null); // 'success', 'error', null
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -63,24 +65,49 @@ const Home = () => {
     try {
       const reader = new FileReader();
       reader.onload = async(event) => {
-        const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
-        const uint8Array = new Uint8Array(arrayBuffer);
-        const request = await FileUploadClient.fileUpload(fileUploadRequest.create({
-          content: uint8Array,
-          date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-        }), {
-          meta: { 'send_using': 'EBulksms' } // Example metadata
-        });
+        try {
+          const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
+          const uint8Array = new Uint8Array(arrayBuffer);
+          const request = await FileUploadClient.fileUpload(fileUploadRequest.create({
+            content: uint8Array,
+            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          }), {
+            meta: { 
+              'send_using': 'email',
+              'emailid': ["1"]
+            } // Example metadata
+          });
 
-        const response = request.response;
+          if(request.status == null) {
+            toast.error("Request timed out. Please try again.");
+            setUploadStatus('error');
+            return;
+          }
 
-        console.log(response);
+          const response = request.response;
+
+          console.log(response);
+          if(response.status == true){
+            toast.success(response.message);
+            setUploadStatus('success');
+            return
+          }
+          setUploadStatus('error');
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+            if(import.meta.env.VITE_ENV === "development") console.error(error);
+            setUploadStatus('error');
+          } finally {
+            setUploading(false);
+          }
       }
       reader.readAsArrayBuffer(file);
-      setUploadStatus('success');
+      
     } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
       if(import.meta.env.VITE_ENV === "development") console.error(error);
       setUploadStatus('error');
+      
     } finally {
       setUploading(false);
     }
@@ -96,42 +123,7 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="max-w-4xl flex flex-col mx-auto px-6 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-4">
-          <div className="flex justify-center items-center px-4 py-2 rounded-full text-lg font-bold mb-6 text-center">
-            <img className="rotate-y-180" width={30} src="/logo-icon.png" alt="Logo"/>
-            <span>SMS Notifications Made Easy</span>
-            <img className="" width={30} src="/logo-icon.png" alt="Logo" />
-          </div>
-          
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Automated Fee Reminder System
-          </h2>
-          
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Upload Neo Cloud student data file and automatically send personalized SMS reminders to students with outstanding fees. Simple, efficient, and effective.
-          </p>
-
-          {/* Feature Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <FileSpreadsheet className="w-10 h-10 text-[#6699ff] mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-800 mb-2">Easy Upload</h3>
-              <p className="text-sm text-gray-600">Support for Excel (.xlsx) and CSV files with student data</p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <NotepadText className="w-10 h-10 text-green-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-800 mb-2">Templating</h3>
-              <p className="text-sm text-gray-600">Create personalized SMS templates</p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <MessageSquare className="w-10 h-10 text-purple-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-800 mb-2">Bulk SMS</h3>
-              <p className="text-sm text-gray-600">Send reminders to multiple students instantly</p>
-            </div>
-          </div>
-        </div>
+        <Hero/>
 
         <Link to="/templates" className='self-center cursor-pointer'>
           <button className="mb-12 px-8 py-3  bg-transparent border-2 border-[#6699ff] text-[#6699ff] font-semibold rounded-lg hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors shadow-xs">
@@ -223,7 +215,7 @@ const Home = () => {
                   ) : (
                     <>
                       <Upload className="w-5 h-5" />
-                      <span>Process File</span>
+                      <span>Send Reminders</span>
                     </>
                   )}
                 </button>
@@ -239,25 +231,26 @@ const Home = () => {
               <div className="flex items-center space-x-3">
                 <CheckCircle className="w-6 h-6 text-green-600" />
                 <div>
-                  <h4 className="font-semibold text-green-800">File processed successfully!</h4>
-                  
+                  <h4 className="font-semibold text-green-800">Reminders sent successfully!</h4>
                 </div>
               </div>
-              <button className='px-4 py-2 bg-[#6699ff] text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors'>Send Reminders</button>
+              {/* <button className='px-4 py-2 bg-[#6699ff] text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors'>Send Reminders</button> */}
             </div>
           )}
 
+          
           {uploadStatus === 'error' && (
             <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-center space-x-3">
                 <AlertCircle className="w-6 h-6 text-red-600" />
                 <div>
-                  <h4 className="font-semibold text-red-800">Invalid file format</h4>
-                  <p className="text-sm text-red-700">Please upload a valid Excel (.xlsx) or CSV file.</p>
+                  <h4 className="font-semibold text-red-800">Failed to send reminders</h4>
+                  <p className="text-sm text-red-700">This may be due to invalid file format or an internal error. Please try again.</p>
                 </div>
               </div>
             </div>
           )}
+
         </div>
 
         {/* Instructions */}

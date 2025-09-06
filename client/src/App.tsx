@@ -8,6 +8,8 @@ import Home from "./pages/Home"
 import Footer from "./components/Footer"
 import NavBar from "./components/NavBar"
 import Templates from "./pages/Templates"
+import SMSBalances from "./pages/SMSBalances"
+import { ToastContainer } from "react-toastify"
 
 function App() {
   
@@ -16,7 +18,7 @@ function App() {
 
     <BrowserRouter>
       <AuthContextProvider>
-        
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         <Routes>
           <Route path="/auth/*" element={
             <>
@@ -35,6 +37,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/templates" element={<Templates />} />
+                <Route path="/balances" element={<SMSBalances/>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </>
