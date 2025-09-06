@@ -1,23 +1,69 @@
 import { useState } from "react"
 import Editor from "./Editor"
+import TemplateClient from "../lib/templateClient";
+import { toast } from "react-toastify";
 
 const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = useState(false)
     const [name, setName] = useState('')
+    const [type, setType] = useState<"email" | "sms">("sms")
     const [text, setText] = useState('')
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         setLoader(true)
         e.preventDefault();
         {/*CREATE API GOES HERE */}
-        try {
-            console.log(name, text);
-        } catch (error) {
-            console.log(error);
-            
-        }finally{
-            setLoader(false)
+        switch (type) {
+            case "email":
+                try {
+                    const request = await TemplateClient.createEmailTemplate({
+                        date: new Date(Date.now()).toString(),
+                        templateContent: text,
+                        templateName: name
+                    })
+                    const response = request.response;
+                    if(response.status == true){
+                        toast.success(response.message);
+                        setOpenCreate(false);
+                        return
+                    }
+                    toast.error(response.message);
+                } catch (error) {
+                    toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+                    if(import.meta.env.VITE_ENV === "development") console.error(error);
+                    
+                }finally{
+                    setLoader(false)
+                }
+                break;
+            case "sms":
+                try {
+                    const request = await TemplateClient.createSmsTemplate({
+                        date: new Date(Date.now()).toString(),
+                        smsTemplateContent: text,
+                        smsTemplateName: name
+                    })
+                    const response = request.response;
+                    if(response.status == true){
+                        toast.success(response.message);
+                        setOpenCreate(false);
+                        return
+                    }
+                    toast.error(response.message);
+                } catch (error) {
+                    toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+                    if(import.meta.env.VITE_ENV === "development") console.error(error);
+                    
+                }finally{
+                    setLoader(false)
+                }
+                break;
+            default:
+                setLoader(false)
+                toast.error("Invalid template type");
+                break;
         }
+        
     }
     
   return (
@@ -40,11 +86,27 @@ const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.Se
                             value={name}
                             className="rounded-lg px-4 py-2 outline-none border-2 border-gray-500 focus:border-[#6699ff]"
                             type="text"
-                            id="number"
+                            id="name"
                             name="name"
                             placeholder="Enter number of groups"
                             required
                         />
+                    </fieldset>
+                    <fieldset className="mb-4 flex flex-col gap-1">
+                        <label className="text-sm" htmlFor="type">
+                            Type
+                        </label>
+                        <select
+                            onChange={(e) => setType(e.target.value as "email" | "sms")}
+                            value={type}
+                            className="rounded-lg appearance-none px-4 py-2 outline-none border-2 border-gray-500 focus:border-[#6699ff]"
+                            id="type"
+                            name="type"
+                            required
+                        >
+                            <option  value="email">Email</option>
+                            <option value="sms">SMS</option>
+                        </select>
                     </fieldset>
                     <p className="text-sm mb-4"><strong>Instructions: </strong>{"You can edit the text below to create a custom template, please do not edit or remove the text in '{ {. } }' symbol"}</p>
                     <Editor text={text} setText={setText} />
