@@ -52,7 +52,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		panic(err)
 	}
 
-	body[0] = Admin
+	Admin = body[0]
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
