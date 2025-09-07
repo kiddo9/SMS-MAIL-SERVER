@@ -4,11 +4,18 @@ import CreateTemplate from "../components/CreateTemplate";
 import { toast } from "react-toastify";
 import TemplateClient from "../lib/templateClient";
 import type { SmsTemplate, Template} from "../proto/Template";
+import DeleteTemplate from "../components/DeleteTemplate";
+import EditTemplate from "../components/EditTemplate";
 
 const Templates = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState('');
+  const [deleteName, setDeleteName] = useState('');
+  const [deleteType, setDeleteType] = useState<'email' | 'sms'>();
+  const [editId, setEditId] = useState('');
+  const [editType, setEditType] = useState<'email' | 'sms'>();
   const [loading , setLoading] = useState(false);
   const [smsTemplates, setSmsTemplates] = useState<SmsTemplate[]>([]);
   const [emailTemplates, setEmailTemplates] = useState<Template[]>([]);
@@ -80,10 +87,19 @@ const Templates = () => {
                         <p className='text-sm  hidden lg:block text-black/50 col-span-2 font-semibold lg:max-w-[200px] xl:max-w-[350px] justify-self-start text-nowrap text-ellipsis overflow-hidden'>{sms.smsTemplateContent}</p>
                         <p className='text-sm  text-black/50 font-semibold justify-self-center'>{new Date(sms.date).toLocaleString()}</p>
                         <div className="flex justify-self-end py-2 gap-2">
-                            <button onClick={() => setOpenEdit(true)} className=" hover:text-blue-500 transition-all cursor-pointer items-center rounded-full text-lg font-bold text-center">
+                            <button onClick={() => {
+                                setOpenEdit(true);
+                                setEditId(sms.id);
+                                setEditType('sms');
+                            }} className=" hover:text-blue-500 transition-all cursor-pointer items-center rounded-full text-lg font-bold text-center">
                                 <Pencil size={20} />
                             </button>
-                            <button onClick={() => setOpenDelete(true)} className=" hover:text-red-500 transition-all cursor-pointer rounded-full text-lg font-bold text-center">
+                            <button onClick={() => {
+                                setOpenDelete(true);
+                                setDeleteId(sms.id);
+                                setDeleteName(sms.smsTemplateName);
+                                setDeleteType('sms');
+                            }} className=" hover:text-red-500 transition-all cursor-pointer rounded-full text-lg font-bold text-center">
                                 <Trash2 size={20} />
                             </button>
                         </div>
@@ -97,10 +113,19 @@ const Templates = () => {
                         <p className='text-sm hidden lg:block  text-black/50 col-span-2 font-semibold lg:max-w-[200px] xl:max-w-[350px] justify-self-start text-nowrap text-ellipsis overflow-hidden'>{email.templateContent}</p>
                         <p className='text-sm  text-black/50 font-semibold justify-self-center'>{new Date(email.date).toLocaleString()}</p>
                         <div className="flex justify-self-end py-2 gap-2">
-                            <button onClick={() => setOpenEdit(true)} className=" hover:text-blue-500 transition-all cursor-pointer items-center rounded-full text-lg font-bold text-center">
+                            <button onClick={() => {
+                                setEditType("email");
+                                setEditId(email.id);
+                                setOpenEdit(true);
+                            }} className=" hover:text-blue-500 transition-all cursor-pointer items-center rounded-full text-lg font-bold text-center">
                                 <Pencil size={20} />
                             </button>
-                            <button onClick={() => setOpenDelete(true)} className=" hover:text-red-500 transition-all cursor-pointer rounded-full text-lg font-bold text-center">
+                            <button onClick={() => {
+                                setDeleteType("email");
+                                setDeleteId(email.id);
+                                setDeleteName(email.templateName);
+                                setOpenDelete(true);
+                            }} className=" hover:text-red-500 transition-all cursor-pointer rounded-full text-lg font-bold text-center">
                                 <Trash2 size={20} />
                             </button>
                         </div>
@@ -111,8 +136,8 @@ const Templates = () => {
             })()
         }
         {openCreate && <CreateTemplate setOpenCreate={setOpenCreate} />}
-        {openEdit && <CreateTemplate setOpenCreate={setOpenEdit} />}
-        {openDelete && <CreateTemplate setOpenCreate={setOpenDelete} />}
+        {openDelete && <DeleteTemplate type={deleteType} id={deleteId} setOpenDelete={setOpenDelete} name={deleteName} />}
+        {openEdit && <EditTemplate type={editType} setOpenEdit={setOpenEdit} id={editId}/>}
     </div>
   )
 }
