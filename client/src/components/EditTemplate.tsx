@@ -171,7 +171,7 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
                         type="submit"
                         className="border-2 mt-2 border-[#6699ff] mb-5 mx-auto text-[#6699ff] hover:bg-blue-500 hover:text-white px-4 py-2 rounded-lg transition duration-300 ease-in cursor-pointer hover:shadow-2xl"
                     >
-                        {loader ? 'Creating...' : 'Create'}
+                        {loader ? 'Editing...' : 'Edit'}
                     </button>
                 </form>
             </div>
