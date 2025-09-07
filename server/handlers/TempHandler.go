@@ -9,6 +9,7 @@ import (
 
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
 	"github.com/kiddo9/SMS-MAIL-SERVER/structures"
+	"github.com/kiddo9/SMS-MAIL-SERVER/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -49,8 +50,14 @@ func (t *Temp) CreateEmailTemplate(ctx context.Context, req *pb.TemplateRequest)
 		return nil, status.Errorf(codes.Internal, "Internal Server Error")
 	}
 
+	idGenerator, err := strconv.Atoi(utils.GenerateId(10))
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Internal Server Error")
+	}
+
 	templateReqBody := structures.EmailTemp{
-		ID:              len(templateData.Templates.EmailsTemp) + 1,
+		ID:              idGenerator,
 		TemplateName:    req.GetTemplateName(),
 		TemplateContent: req.GetTemplateContent(),
 		Date:            req.GetDate(),
@@ -83,8 +90,14 @@ func (t *Temp) CreateSmsTemplate(ctx context.Context, req *pb.SmsTemplateRequest
 		return nil, status.Errorf(codes.Internal, "Internal Server Error")
 	}
 
+	idGenerator, err := strconv.Atoi(utils.GenerateId(10))
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Internal Server Error")
+	}
+
 	smsTemplateReqBody := structures.SmsTemp{
-		ID: len(templateData.Templates.SmsTemp) + 1,
+		ID: idGenerator,
 		TemplateName: req.SmsTemplateName,
 		TemplateContent: req.SmsTemplateContent,
 		Date: req.Date,
@@ -322,4 +335,72 @@ func (t *Temp) AllTemplates(req *pb.TemplateFetchRequest, stream pb.TemplateServ
 	}
 
 	return nil
+}
+
+func (t *Temp) DeleteTemplate(ctx context.Context, req *pb.DeleteTemplateRequest)(*pb.Response, error){
+	err := LoadTemplate()
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Internal Server Error")
+	}
+
+	templateId := req.GetId()
+	templateType := req.GetType() // "email" or "sms"
+
+	if templateType != "email" && templateType != "sms" {
+		return nil, status.Errorf(codes.InvalidArgument, "Invalid template type. Must be 'email' or 'sms'")
+	}
+
+	convertToNumber, err := strconv.Atoi(templateId)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Internal Server Error")
+	}
+
+	// Attempt to delete from email templates
+	if templateType == "email" {
+		for idx, v := range templateData.Templates.EmailsTemp {
+			if v.ID == convertToNumber {
+				emailData := templateData.Templates.EmailsTemp
+				emailData = append(emailData[:idx], emailData[idx+1:]...)
+				templateData.Templates.EmailsTemp = emailData
+				
+				updatedData, err := json.MarshalIndent(templateData, " ", " ")
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "Internal Server Error")
+				}
+
+				err = os.WriteFile(templateFileName, updatedData, 0644)
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "Internal Server Error")
+				}
+
+				return &pb.Response{Status: true, Message: "Email Template Deleted Successfully"}, nil
+			}
+		}
+	}
+
+	if templateType == "sms" {
+		for idx, v := range templateData.Templates.SmsTemp {
+			if v.ID == convertToNumber {
+				smsData := templateData.Templates.SmsTemp
+				smsData = append(smsData[:idx], smsData[idx+1:]...)
+				templateData.Templates.SmsTemp = smsData
+				
+				updatedData, err := json.MarshalIndent(templateData, " ", " ")
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "Internal Server Error")
+				}
+
+				err = os.WriteFile(templateFileName, updatedData, 0644)
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "Internal Server Error")
+				}
+
+				return &pb.Response{Status: true, Message: "SMS Template Deleted Successfully"}, nil
+			}
+		}
+	}
+
+	return nil, status.Errorf(codes.NotFound, "Template Not Found")
 }

@@ -67,6 +67,11 @@ message TemplateFetchResponse {
     SmsTemplate smsTemplate = 2;
 }
 
+message DeleteTemplateRequest {
+    string id = 1;
+    string type = 2; // "email" or "sms"
+}
+
 service TemplateServices {
     rpc CreateEmailTemplate(TemplateRequest) returns (Response) {}
     rpc CreateSmsTemplate(SmsTemplateRequest) returns (Response) {}
@@ -75,4 +80,5 @@ service TemplateServices {
     rpc EditSmsTemplate(SmsTemplateEditRequest) returns (Response) {}
     rpc GetEmailTemplateById(GetATemplateRequest) returns (GetATemplateResponse) {}
     rpc GetSmsTemplateById(GetAnSmsTemplateRequest) returns (GetAnSmsTemplateResponse) {}
+    rpc DeleteTemplate(DeleteTemplateRequest) returns (Response) {}
 }
