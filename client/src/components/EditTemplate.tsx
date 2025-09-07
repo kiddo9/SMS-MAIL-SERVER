@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import TemplateClient from '../lib/templateClient';
 import Editor from './Editor';
 
-const EditTemplate = ({id, setOpenEdit, type}: {id: string, setOpenEdit: React.Dispatch<React.SetStateAction<boolean>>, type: 'sms' | 'email' | undefined}) => {
+const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEdit: React.Dispatch<React.SetStateAction<boolean>>, type: 'sms' | 'email' | undefined, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = useState(false)
     const [name, setName] = useState('')
     const [text, setText] = useState('')
@@ -30,6 +30,7 @@ const EditTemplate = ({id, setOpenEdit, type}: {id: string, setOpenEdit: React.D
                     if(response.status == true){
                         toast.success(response.message);
                         setOpenEdit(false);
+                        setReload(true);
                         return
                     }
                     toast.error(response.message);
@@ -55,6 +56,7 @@ const EditTemplate = ({id, setOpenEdit, type}: {id: string, setOpenEdit: React.D
                     if(response.status == true){
                         toast.success(response.message);
                         setOpenEdit(false);
+                        setReload(true);
                         return
                     }
                     toast.error(response.message);

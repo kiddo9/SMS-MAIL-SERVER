@@ -19,6 +19,7 @@ const Templates = () => {
   const [loading , setLoading] = useState(false);
   const [smsTemplates, setSmsTemplates] = useState<SmsTemplate[]>([]);
   const [emailTemplates, setEmailTemplates] = useState<Template[]>([]);
+  const [reload, setReload] = useState(false);
 
   useEffect(() => {
     const getTemplates = async () => {
@@ -45,10 +46,11 @@ const Templates = () => {
         if(import.meta.env.VITE_ENV === "development") console.error(error);
       }finally{
         setLoading(false);
+        setReload(false);
       }
     }
     getTemplates();
-  }, []);
+  }, [reload]);
   return (
     <div className="min-h-[calc(100vh-120px)] bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="flex flex-col mx-auto px-6 py-8">
@@ -135,9 +137,9 @@ const Templates = () => {
               )
             })()
         }
-        {openCreate && <CreateTemplate setOpenCreate={setOpenCreate} />}
-        {openDelete && <DeleteTemplate type={deleteType} id={deleteId} setOpenDelete={setOpenDelete} name={deleteName} />}
-        {openEdit && <EditTemplate type={editType} setOpenEdit={setOpenEdit} id={editId}/>}
+        {openCreate && <CreateTemplate setReload={setReload} setOpenCreate={setOpenCreate} />}
+        {openDelete && <DeleteTemplate setReload={setReload} type={deleteType} id={deleteId} setOpenDelete={setOpenDelete} name={deleteName} />}
+        {openEdit && <EditTemplate setReload={setReload} type={editType} setOpenEdit={setOpenEdit} id={editId}/>}
     </div>
   )
 }

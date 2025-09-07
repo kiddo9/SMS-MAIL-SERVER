@@ -4,7 +4,7 @@ import TemplateClient from "../lib/templateClient";
 import { toast } from "react-toastify";
 import { demoTemplate } from "../lib/constants";
 
-const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.SetStateAction<boolean>>}) => {
+const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispatch<React.SetStateAction<boolean>>, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = useState(false)
     const [name, setName] = useState('')
     const [type, setType] = useState<"email" | "sms">("sms")
@@ -26,6 +26,7 @@ const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.Se
                     if(response.status == true){
                         toast.success(response.message);
                         setOpenCreate(false);
+                        setReload(true);
                         return
                     }
                     toast.error(response.message);
@@ -48,6 +49,7 @@ const CreateTemplate = ({setOpenCreate}: {setOpenCreate: React.Dispatch<React.Se
                     if(response.status == true){
                         toast.success(response.message);
                         setOpenCreate(false);
+                        setReload(true);
                         return
                     }
                     toast.error(response.message);

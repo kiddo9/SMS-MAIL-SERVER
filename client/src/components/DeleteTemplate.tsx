@@ -2,7 +2,7 @@ import React from 'react'
 import { toast } from 'react-toastify';
 
 
-const DeleteTemplate = ({setOpenDelete, type, name, id}: {setOpenDelete: React.Dispatch<React.SetStateAction<boolean>>, type: 'email' | 'sms' | undefined, name: string, id: string}) => {
+const DeleteTemplate = ({setOpenDelete, type, name, id, setReload}: {setOpenDelete: React.Dispatch<React.SetStateAction<boolean>>, type: 'email' | 'sms' | undefined, name: string, id: string, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = React.useState(false);
     const handleDelete = async() => {
         setLoader(true);
