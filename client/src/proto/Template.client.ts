@@ -4,6 +4,7 @@
 import type { RpcTransport } from "@protobuf-ts/runtime-rpc";
 import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
 import { TemplateServices } from "./Template";
+import type { DeleteTemplateRequest } from "./Template";
 import type { GetAnSmsTemplateResponse } from "./Template";
 import type { GetAnSmsTemplateRequest } from "./Template";
 import type { GetATemplateResponse } from "./Template";
@@ -51,6 +52,10 @@ export interface ITemplateServicesClient {
      * @generated from protobuf rpc: GetSmsTemplateById
      */
     getSmsTemplateById(input: GetAnSmsTemplateRequest, options?: RpcOptions): UnaryCall<GetAnSmsTemplateRequest, GetAnSmsTemplateResponse>;
+    /**
+     * @generated from protobuf rpc: DeleteTemplate
+     */
+    deleteTemplate(input: DeleteTemplateRequest, options?: RpcOptions): UnaryCall<DeleteTemplateRequest, Response>;
 }
 /**
  * @generated from protobuf service Templates.TemplateServices
@@ -109,5 +114,12 @@ export class TemplateServicesClient implements ITemplateServicesClient, ServiceI
     getSmsTemplateById(input: GetAnSmsTemplateRequest, options?: RpcOptions): UnaryCall<GetAnSmsTemplateRequest, GetAnSmsTemplateResponse> {
         const method = this.methods[6], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetAnSmsTemplateRequest, GetAnSmsTemplateResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * @generated from protobuf rpc: DeleteTemplate
+     */
+    deleteTemplate(input: DeleteTemplateRequest, options?: RpcOptions): UnaryCall<DeleteTemplateRequest, Response> {
+        const method = this.methods[7], opt = this._transport.mergeOptions(options);
+        return stackIntercept<DeleteTemplateRequest, Response>("unary", this._transport, method, opt, input);
     }
 }

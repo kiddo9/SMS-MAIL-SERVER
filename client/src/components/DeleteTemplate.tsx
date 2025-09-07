@@ -1,5 +1,6 @@
 import React from 'react'
 import { toast } from 'react-toastify';
+import TemplateClient from '../lib/templateClient';
 
 
 const DeleteTemplate = ({setOpenDelete, type, name, id, setReload}: {setOpenDelete: React.Dispatch<React.SetStateAction<boolean>>, type: 'email' | 'sms' | undefined, name: string, id: string, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
@@ -7,27 +8,18 @@ const DeleteTemplate = ({setOpenDelete, type, name, id, setReload}: {setOpenDele
     const handleDelete = async() => {
         setLoader(true);
         try {
-            switch (type) {
-                case "email":
-                    try {
-                        //api goes here
-                    } catch (error) {
-                        toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
-                        if(import.meta.env.VITE_ENV === "development") console.error(error);
-                        
-                    }
-                    break;
-                case "sms":
-                    try {
-                        //api goes here
-                    } catch (error) {
-                        toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
-                        if(import.meta.env.VITE_ENV === "development") console.error(error);
-                    }
-                    break;
-                default:
-                    break;
+            const request = await TemplateClient.deleteTemplate({
+                type: type as 'email' | 'sms',
+                id
+            });
+            const response = request.response;
+            if(response.status == true){
+                toast.success(response.message);
+                setOpenDelete(false);
+                setReload(true);
+                return
             }
+            toast.error(response.message);
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
             if(import.meta.env.VITE_ENV === "development") console.error(error);
