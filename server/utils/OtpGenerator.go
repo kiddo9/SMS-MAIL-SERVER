@@ -15,3 +15,14 @@ func GenerateCode(length int) string {
 	}
 	return string(code)
 }
+
+func GenerateId(length int) string {
+	const charset = "0123456789"
+	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	code := make([]byte, length)
+	for i := range code {
+		code[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(code)
+}

@@ -15,11 +15,14 @@ func main() {
 	conn, _ := grpc.NewClient("localhost:9001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	defer conn.Close()
 
-	client := pb.NewSmsServicesClient(conn)
+	client := pb.NewTemplateServicesClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	resp, err := client.BulkSmsWallet(ctx, &pb.BulkSms{})
+	resp, err := client.DeleteTemplate(ctx, &pb.DeleteTemplateRequest{
+		Id:   "2",
+		Type: "email",
+	})
 
 	if err != nil {
 		log.Fatalf("error occoured %v", err)

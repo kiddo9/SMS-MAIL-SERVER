@@ -681,6 +681,58 @@ func (x *TemplateFetchResponse) GetSmsTemplate() *SmsTemplate {
 	return nil
 }
 
+type DeleteTemplateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"` // "email" or "sms"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTemplateRequest) Reset() {
+	*x = DeleteTemplateRequest{}
+	mi := &file_proto_Template_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTemplateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTemplateRequest) ProtoMessage() {}
+
+func (x *DeleteTemplateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_Template_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTemplateRequest.ProtoReflect.Descriptor instead.
+func (*DeleteTemplateRequest) Descriptor() ([]byte, []int) {
+	return file_proto_Template_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *DeleteTemplateRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *DeleteTemplateRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
 var File_proto_Template_proto protoreflect.FileDescriptor
 
 const file_proto_Template_proto_rawDesc = "" +
@@ -722,7 +774,10 @@ const file_proto_Template_proto_rawDesc = "" +
 	"\x14TemplateFetchRequest\"\x8c\x01\n" +
 	"\x15TemplateFetchResponse\x129\n" +
 	"\remailTemplate\x18\x01 \x01(\v2\x13.Templates.TemplateR\remailTemplate\x128\n" +
-	"\vsmsTemplate\x18\x02 \x01(\v2\x16.Templates.SmsTemplateR\vsmsTemplate2\xd3\x04\n" +
+	"\vsmsTemplate\x18\x02 \x01(\v2\x16.Templates.SmsTemplateR\vsmsTemplate\";\n" +
+	"\x15DeleteTemplateRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type2\x9e\x05\n" +
 	"\x10TemplateServices\x12H\n" +
 	"\x13CreateEmailTemplate\x12\x1a.Templates.TemplateRequest\x1a\x13.Templates.Response\"\x00\x12I\n" +
 	"\x11CreateSmsTemplate\x12\x1d.Templates.SmsTemplateRequest\x1a\x13.Templates.Response\"\x00\x12U\n" +
@@ -730,7 +785,8 @@ const file_proto_Template_proto_rawDesc = "" +
 	"\x11EditEmailTemplate\x12\x1e.Templates.TemplateEditRequest\x1a\x13.Templates.Response\"\x00\x12K\n" +
 	"\x0fEditSmsTemplate\x12!.Templates.SmsTemplateEditRequest\x1a\x13.Templates.Response\"\x00\x12Y\n" +
 	"\x14GetEmailTemplateById\x12\x1e.Templates.GetATemplateRequest\x1a\x1f.Templates.GetATemplateResponse\"\x00\x12_\n" +
-	"\x12GetSmsTemplateById\x12\".Templates.GetAnSmsTemplateRequest\x1a#.Templates.GetAnSmsTemplateResponse\"\x00B\x0fZ\rmessage/protob\x06proto3"
+	"\x12GetSmsTemplateById\x12\".Templates.GetAnSmsTemplateRequest\x1a#.Templates.GetAnSmsTemplateResponse\"\x00\x12I\n" +
+	"\x0eDeleteTemplate\x12 .Templates.DeleteTemplateRequest\x1a\x13.Templates.Response\"\x00B\x0fZ\rmessage/protob\x06proto3"
 
 var (
 	file_proto_Template_proto_rawDescOnce sync.Once
@@ -744,7 +800,7 @@ func file_proto_Template_proto_rawDescGZIP() []byte {
 	return file_proto_Template_proto_rawDescData
 }
 
-var file_proto_Template_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_proto_Template_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_proto_Template_proto_goTypes = []any{
 	(*Template)(nil),                 // 0: Templates.Template
 	(*SmsTemplate)(nil),              // 1: Templates.SmsTemplate
@@ -759,6 +815,7 @@ var file_proto_Template_proto_goTypes = []any{
 	(*SmsTemplateEditRequest)(nil),   // 10: Templates.SmsTemplateEditRequest
 	(*TemplateFetchRequest)(nil),     // 11: Templates.TemplateFetchRequest
 	(*TemplateFetchResponse)(nil),    // 12: Templates.TemplateFetchResponse
+	(*DeleteTemplateRequest)(nil),    // 13: Templates.DeleteTemplateRequest
 }
 var file_proto_Template_proto_depIdxs = []int32{
 	0,  // 0: Templates.GetATemplateResponse.template:type_name -> Templates.Template
@@ -774,15 +831,17 @@ var file_proto_Template_proto_depIdxs = []int32{
 	10, // 10: Templates.TemplateServices.EditSmsTemplate:input_type -> Templates.SmsTemplateEditRequest
 	5,  // 11: Templates.TemplateServices.GetEmailTemplateById:input_type -> Templates.GetATemplateRequest
 	7,  // 12: Templates.TemplateServices.GetSmsTemplateById:input_type -> Templates.GetAnSmsTemplateRequest
-	2,  // 13: Templates.TemplateServices.CreateEmailTemplate:output_type -> Templates.Response
-	2,  // 14: Templates.TemplateServices.CreateSmsTemplate:output_type -> Templates.Response
-	12, // 15: Templates.TemplateServices.AllTemplates:output_type -> Templates.TemplateFetchResponse
-	2,  // 16: Templates.TemplateServices.EditEmailTemplate:output_type -> Templates.Response
-	2,  // 17: Templates.TemplateServices.EditSmsTemplate:output_type -> Templates.Response
-	6,  // 18: Templates.TemplateServices.GetEmailTemplateById:output_type -> Templates.GetATemplateResponse
-	8,  // 19: Templates.TemplateServices.GetSmsTemplateById:output_type -> Templates.GetAnSmsTemplateResponse
-	13, // [13:20] is the sub-list for method output_type
-	6,  // [6:13] is the sub-list for method input_type
+	13, // 13: Templates.TemplateServices.DeleteTemplate:input_type -> Templates.DeleteTemplateRequest
+	2,  // 14: Templates.TemplateServices.CreateEmailTemplate:output_type -> Templates.Response
+	2,  // 15: Templates.TemplateServices.CreateSmsTemplate:output_type -> Templates.Response
+	12, // 16: Templates.TemplateServices.AllTemplates:output_type -> Templates.TemplateFetchResponse
+	2,  // 17: Templates.TemplateServices.EditEmailTemplate:output_type -> Templates.Response
+	2,  // 18: Templates.TemplateServices.EditSmsTemplate:output_type -> Templates.Response
+	6,  // 19: Templates.TemplateServices.GetEmailTemplateById:output_type -> Templates.GetATemplateResponse
+	8,  // 20: Templates.TemplateServices.GetSmsTemplateById:output_type -> Templates.GetAnSmsTemplateResponse
+	2,  // 21: Templates.TemplateServices.DeleteTemplate:output_type -> Templates.Response
+	14, // [14:22] is the sub-list for method output_type
+	6,  // [6:14] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -799,7 +858,7 @@ func file_proto_Template_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_Template_proto_rawDesc), len(file_proto_Template_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

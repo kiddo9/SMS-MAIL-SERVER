@@ -26,6 +26,7 @@ const (
 	TemplateServices_EditSmsTemplate_FullMethodName      = "/Templates.TemplateServices/EditSmsTemplate"
 	TemplateServices_GetEmailTemplateById_FullMethodName = "/Templates.TemplateServices/GetEmailTemplateById"
 	TemplateServices_GetSmsTemplateById_FullMethodName   = "/Templates.TemplateServices/GetSmsTemplateById"
+	TemplateServices_DeleteTemplate_FullMethodName       = "/Templates.TemplateServices/DeleteTemplate"
 )
 
 // TemplateServicesClient is the client API for TemplateServices service.
@@ -39,6 +40,7 @@ type TemplateServicesClient interface {
 	EditSmsTemplate(ctx context.Context, in *SmsTemplateEditRequest, opts ...grpc.CallOption) (*Response, error)
 	GetEmailTemplateById(ctx context.Context, in *GetATemplateRequest, opts ...grpc.CallOption) (*GetATemplateResponse, error)
 	GetSmsTemplateById(ctx context.Context, in *GetAnSmsTemplateRequest, opts ...grpc.CallOption) (*GetAnSmsTemplateResponse, error)
+	DeleteTemplate(ctx context.Context, in *DeleteTemplateRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type templateServicesClient struct {
@@ -128,6 +130,16 @@ func (c *templateServicesClient) GetSmsTemplateById(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *templateServicesClient) DeleteTemplate(ctx context.Context, in *DeleteTemplateRequest, opts ...grpc.CallOption) (*Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Response)
+	err := c.cc.Invoke(ctx, TemplateServices_DeleteTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TemplateServicesServer is the server API for TemplateServices service.
 // All implementations must embed UnimplementedTemplateServicesServer
 // for forward compatibility.
@@ -139,6 +151,7 @@ type TemplateServicesServer interface {
 	EditSmsTemplate(context.Context, *SmsTemplateEditRequest) (*Response, error)
 	GetEmailTemplateById(context.Context, *GetATemplateRequest) (*GetATemplateResponse, error)
 	GetSmsTemplateById(context.Context, *GetAnSmsTemplateRequest) (*GetAnSmsTemplateResponse, error)
+	DeleteTemplate(context.Context, *DeleteTemplateRequest) (*Response, error)
 	mustEmbedUnimplementedTemplateServicesServer()
 }
 
@@ -169,6 +182,9 @@ func (UnimplementedTemplateServicesServer) GetEmailTemplateById(context.Context,
 }
 func (UnimplementedTemplateServicesServer) GetSmsTemplateById(context.Context, *GetAnSmsTemplateRequest) (*GetAnSmsTemplateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSmsTemplateById not implemented")
+}
+func (UnimplementedTemplateServicesServer) DeleteTemplate(context.Context, *DeleteTemplateRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTemplate not implemented")
 }
 func (UnimplementedTemplateServicesServer) mustEmbedUnimplementedTemplateServicesServer() {}
 func (UnimplementedTemplateServicesServer) testEmbeddedByValue()                          {}
@@ -310,6 +326,24 @@ func _TemplateServices_GetSmsTemplateById_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TemplateServices_DeleteTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TemplateServicesServer).DeleteTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TemplateServices_DeleteTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TemplateServicesServer).DeleteTemplate(ctx, req.(*DeleteTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TemplateServices_ServiceDesc is the grpc.ServiceDesc for TemplateServices service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -340,6 +374,10 @@ var TemplateServices_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSmsTemplateById",
 			Handler:    _TemplateServices_GetSmsTemplateById_Handler,
+		},
+		{
+			MethodName: "DeleteTemplate",
+			Handler:    _TemplateServices_DeleteTemplate_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
