@@ -4,12 +4,15 @@ import { Link } from 'react-router-dom';
 import FileUploadClient from '../lib/fileUploadClient';
 import Hero from '../components/Hero';
 import { toast } from 'react-toastify';
+import TemplatePicker from '../components/TemplatePicker';
+import type { SmsTemplate, Template } from '../proto/Template';
 
 const Home = () => {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'success' | 'error' | null>(null); // 'success', 'error', null
+  const [selectedTemplate, setSelectedTemplate] = useState<{ template: Template | SmsTemplate, type: "email" | "sms" } | null>(null);
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -59,21 +62,44 @@ const Home = () => {
     if (!file) return;
     
     setUploading(true);
+
+    if(!selectedTemplate || !selectedTemplate.template || !selectedTemplate.type) {
+      toast.error("Please select a template.");
+      setUploading(false);
+      return;
+    }
+
+    let meta = {};
+    if(selectedTemplate.type === "email") {
+      meta = { 
+        'send_using': 'email',
+        'emailid': selectedTemplate.template.id.toString(),
+      }
+    } else if(selectedTemplate.type === "sms") {
+      meta = { 
+        'send_using': 'EBulksms',
+        'smsid': selectedTemplate.template.id.toString(),
+      }
+    }else{
+      toast.error("Please select a template.");
+      setUploading(false);
+      return;
+    }
     
     // Simulate file processing
     try {
       const reader = new FileReader();
+      console.log(meta);
       reader.onload = async(event) => {
         try {
           const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
           const uint8Array = new Uint8Array(arrayBuffer);
           const request = await FileUploadClient.fileUpload({
             content: uint8Array,
-            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toString()
+            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
           }, {
             meta: { 
-              'send_using': 'email',
-              'emailid': ["1"]
+              ...meta
             } // Example metadata
           });
 
@@ -129,10 +155,12 @@ const Home = () => {
             Manage Templates
           </button>
         </Link>
+
+        <TemplatePicker onTemplateSelect={setSelectedTemplate}/>
         
 
         {/* Upload Section */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl mt-5 shadow-xl border border-gray-200 p-8">
           <div className="text-center mb-6">
             <h3 className="text-2xl font-bold text-gray-800 mb-2">Upload Student Data</h3>
             <p className="text-gray-600">Upload your Excel or CSV file containing student names, phone numbers, and fee balances</p>

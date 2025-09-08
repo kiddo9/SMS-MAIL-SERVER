@@ -31,12 +31,12 @@ const Templates = () => {
         for await (const response of tempStream.responses) {
           
           if(response.emailTemplate){
-            console.log(response);
+            // console.log(response);
             emailArray.push(response.emailTemplate);
             setEmailTemplates(emailArray);
           }
           if(response.smsTemplate){
-            console.log(response);
+            // console.log(response);
             smsArray.push(response.smsTemplate);
             setSmsTemplates(smsArray);
           }

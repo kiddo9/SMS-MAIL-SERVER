@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/kiddo9/SMS-MAIL-SERVER/config"
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
@@ -66,37 +67,50 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var emailIdStr string
 	var smsIdStr string
 	var Message string
+	var Id int
+	var SmsId int
 
 	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
 
-	
 	if len(EmailId) == 0 && len(smsId) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
-	} 
+	}
 
-	if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")){
+	if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")) {
 		emailIdStr = EmailId[0]
 		smsIdStr = smsId[0]
-	}else if contains(md["send_using"], "email") {
+
+		Id, err = strconv.Atoi(emailIdStr)
+
+		if err != nil {
+			return nil, err
+		}
+
+		SmsId, err = strconv.Atoi(smsIdStr)
+
+		if err != nil {
+			return nil, err
+		}
+	} else if contains(md["send_using"], "email") {
 		emailIdStr = EmailId[0]
+
+		Id, err = strconv.Atoi(emailIdStr)
+
+		if err != nil {
+			return nil, err
+		}
 	} else if contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms") {
 		smsIdStr = smsId[0]
-	}else{
+
+		SmsId, err = strconv.Atoi(smsIdStr)
+
+		if err != nil {
+			return nil, err
+		}
+	} else {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
-	}
-
-	Id, err := strconv.Atoi(emailIdStr)
-
-	if err != nil {
-		return nil, err
-	}
-
-	SmsId, err := strconv.Atoi(smsIdStr)
-
-	if err != nil {
-		return nil, err
 	}
 
 	file := req.GetContent()
@@ -127,13 +141,15 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 				continue
 			}
 
+			// fmt.Println(row[0], "0", row[1], "1", row[2], "2", row[3], "3", row[4], "4", row[5], "5", row[6], "6", row[12], "12")
+
 			name := row[0]
 			pendingPrice := row[12]
 			phone := row[3]
 			course := row[2]
 			email := row[5]
 
-			if pendingPrice != "" {
+			if strings.TrimSpace(pendingPrice) != "" {
 				if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")) {
 					if contains(md["send_using"], "EBulksms") {
 						MMth = "EBulksms"
@@ -163,7 +179,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 					}
 
 					if messageMethod == "email" {
-						_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email,messageMethod, Id)
+						_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email, messageMethod, Id)
 
 						if err != nil {
 							return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")

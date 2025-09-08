@@ -28,7 +28,7 @@ static_resources:
                               allow_origin_string_match:
                                 - prefix: "http://localhost:5173"
                               allow_methods: "POST, GET, OPTIONS"
-                              allow_headers: "content-type,x-grpc-web,send_using,recaptcha-token,emailid"
+                              allow_headers: "content-type,x-grpc-web,send_using,recaptcha-token,emailid,smsid"
                               max_age: "86400"
                               expose_headers: "grpc-status,grpc-message"
                 http_filters:

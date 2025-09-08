@@ -172,6 +172,19 @@ export interface TemplateFetchResponse {
      */
     smsTemplate?: SmsTemplate;
 }
+/**
+ * @generated from protobuf message Templates.DeleteTemplateRequest
+ */
+export interface DeleteTemplateRequest {
+    /**
+     * @generated from protobuf field: string id = 1
+     */
+    id: string;
+    /**
+     * @generated from protobuf field: string type = 2
+     */
+    type: string; // "email" or "sms"
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class Template$Type extends MessageType<Template> {
     constructor() {
@@ -864,6 +877,61 @@ class TemplateFetchResponse$Type extends MessageType<TemplateFetchResponse> {
  * @generated MessageType for protobuf message Templates.TemplateFetchResponse
  */
 export const TemplateFetchResponse = new TemplateFetchResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteTemplateRequest$Type extends MessageType<DeleteTemplateRequest> {
+    constructor() {
+        super("Templates.DeleteTemplateRequest", [
+            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<DeleteTemplateRequest>): DeleteTemplateRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = "";
+        message.type = "";
+        if (value !== undefined)
+            reflectionMergePartial<DeleteTemplateRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteTemplateRequest): DeleteTemplateRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string id */ 1:
+                    message.id = reader.string();
+                    break;
+                case /* string type */ 2:
+                    message.type = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteTemplateRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* string type = 2; */
+        if (message.type !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.type);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Templates.DeleteTemplateRequest
+ */
+export const DeleteTemplateRequest = new DeleteTemplateRequest$Type();
 /**
  * @generated ServiceType for protobuf service Templates.TemplateServices
  */
@@ -874,5 +942,6 @@ export const TemplateServices = new ServiceType("Templates.TemplateServices", [
     { name: "EditEmailTemplate", options: {}, I: TemplateEditRequest, O: Response },
     { name: "EditSmsTemplate", options: {}, I: SmsTemplateEditRequest, O: Response },
     { name: "GetEmailTemplateById", options: {}, I: GetATemplateRequest, O: GetATemplateResponse },
-    { name: "GetSmsTemplateById", options: {}, I: GetAnSmsTemplateRequest, O: GetAnSmsTemplateResponse }
+    { name: "GetSmsTemplateById", options: {}, I: GetAnSmsTemplateRequest, O: GetAnSmsTemplateResponse },
+    { name: "DeleteTemplate", options: {}, I: DeleteTemplateRequest, O: Response }
 ]);
