@@ -96,7 +96,7 @@ const Home = () => {
           const uint8Array = new Uint8Array(arrayBuffer);
           const request = await FileUploadClient.fileUpload({
             content: uint8Array,
-            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toString()
+            date: new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
           }, {
             meta: { 
               ...meta

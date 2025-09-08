@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/kiddo9/SMS-MAIL-SERVER/config"
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
@@ -140,13 +141,15 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 				continue
 			}
 
+			// fmt.Println(row[0], "0", row[1], "1", row[2], "2", row[3], "3", row[4], "4", row[5], "5", row[6], "6", row[12], "12")
+
 			name := row[0]
 			pendingPrice := row[12]
 			phone := row[3]
 			course := row[2]
 			email := row[5]
 
-			if pendingPrice != "" {
+			if strings.TrimSpace(pendingPrice) != "" {
 				if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")) {
 					if contains(md["send_using"], "EBulksms") {
 						MMth = "EBulksms"
