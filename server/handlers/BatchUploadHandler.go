@@ -67,13 +67,25 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var smsIdStr string
 	var Message string
 
+	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
+		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
+	}
+
 	
 	if len(EmailId) == 0 && len(smsId) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
 	} 
 
-	emailIdStr = EmailId[0]
-	smsIdStr = smsId[0]
+	if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")){
+		emailIdStr = EmailId[0]
+		smsIdStr = smsId[0]
+	}else if contains(md["send_using"], "email") {
+		emailIdStr = EmailId[0]
+	} else if contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms") {
+		smsIdStr = smsId[0]
+	}else{
+		return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
+	}
 
 	Id, err := strconv.Atoi(emailIdStr)
 
@@ -85,10 +97,6 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 	if err != nil {
 		return nil, err
-	}
-
-	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
-		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
 
 	file := req.GetContent()
