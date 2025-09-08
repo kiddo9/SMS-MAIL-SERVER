@@ -23,7 +23,7 @@ func sendEmail(email string, body bytes.Buffer, subject string) (bool, error) {
 	smsPortConvertion, err := strconv.Atoi(MailVariables["SMTP_PORT"])
 
 	if err != nil {
-		fmt.Print(err, MailVariables)
+		fmt.Print(err)
 		return false, status.Errorf(codes.Internal, "internal server error")
 	}
 
