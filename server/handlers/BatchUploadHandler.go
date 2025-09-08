@@ -66,37 +66,50 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var emailIdStr string
 	var smsIdStr string
 	var Message string
+	var Id int
+	var SmsId int
 
 	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
 
-	
 	if len(EmailId) == 0 && len(smsId) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
-	} 
+	}
 
-	if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")){
+	if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")) {
 		emailIdStr = EmailId[0]
 		smsIdStr = smsId[0]
-	}else if contains(md["send_using"], "email") {
+
+		Id, err = strconv.Atoi(emailIdStr)
+
+		if err != nil {
+			return nil, err
+		}
+
+		SmsId, err = strconv.Atoi(smsIdStr)
+
+		if err != nil {
+			return nil, err
+		}
+	} else if contains(md["send_using"], "email") {
 		emailIdStr = EmailId[0]
+
+		Id, err = strconv.Atoi(emailIdStr)
+
+		if err != nil {
+			return nil, err
+		}
 	} else if contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms") {
 		smsIdStr = smsId[0]
-	}else{
+
+		SmsId, err = strconv.Atoi(smsIdStr)
+
+		if err != nil {
+			return nil, err
+		}
+	} else {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
-	}
-
-	Id, err := strconv.Atoi(emailIdStr)
-
-	if err != nil {
-		return nil, err
-	}
-
-	SmsId, err := strconv.Atoi(smsIdStr)
-
-	if err != nil {
-		return nil, err
 	}
 
 	file := req.GetContent()
@@ -163,7 +176,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 					}
 
 					if messageMethod == "email" {
-						_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email,messageMethod, Id)
+						_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email, messageMethod, Id)
 
 						if err != nil {
 							return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")

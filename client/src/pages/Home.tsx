@@ -74,13 +74,11 @@ const Home = () => {
       meta = { 
         'send_using': 'email',
         'emailid': selectedTemplate.template.id.toString(),
-        'smsid': selectedTemplate.template.id.toString()
       }
     } else if(selectedTemplate.type === "sms") {
       meta = { 
         'send_using': 'EBulksms',
         'smsid': selectedTemplate.template.id.toString(),
-        'emailid': selectedTemplate.template.id.toString(),
       }
     }else{
       toast.error("Please select a template.");

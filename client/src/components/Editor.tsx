@@ -27,7 +27,7 @@ const Editor = ({setText, initialText}: {initialText: string, setText: React.Dis
         if (quill) {
           quill.root.innerHTML = initialText;
           quill.on('text-change', () => {
-            setText(quill.root.innerHTML);
+            setText(quill.getText());
           });
         }
       }, [quill, setText, initialText]);
