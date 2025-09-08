@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { createContext, useContext, useState } from "react"
+// import { useLocation } from "react-router-dom"
 
 
 const Context  = createContext<{
@@ -11,22 +11,22 @@ const Context  = createContext<{
 })
 const AuthContextProvider = ({children}: {children: React.ReactNode}) => {
   const [atk, setAtk] = useState("")
-  const path = useLocation().pathname
+  // const path = useLocation().pathname
 
 
 
 
-  useEffect(() => {
-    const savedToken = localStorage.getItem("atk");
-    if (savedToken) {
-      setAtk(savedToken);
-    }
-    else if(!path.includes("/auth/") && !atk){
-        window.location.href = "/auth/login"
-        return
-    } 
-    else return
-  }, [atk, path]);
+  // useEffect(() => {
+  //   const savedToken = localStorage.getItem("atk");
+  //   if (savedToken) {
+  //     setAtk(savedToken);
+  //   }
+  //   else if(!path.includes("/auth/") && !atk){
+  //       // window.location.href = "/auth/login"
+  //       return
+  //   } 
+  //   else return
+  // }, [atk, path]);
 
   const setAtkFunc = (newToken: string) => {
     if (newToken) {

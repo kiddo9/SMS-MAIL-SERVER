@@ -36,8 +36,8 @@ func init() {
 	}
 }
 
-func LoadTemplate(templateType string, id int)(string, error){
-	var TemplateContent string 
+func LoadTemplate(templateType string, id int) (string, error) {
+	var TemplateContent string
 
 	_, err := os.Open("storage/Templates.json")
 
@@ -67,16 +67,16 @@ func LoadTemplate(templateType string, id int)(string, error){
 				return TemplateContent, nil
 			}
 		}
-	}else if templateType == "sms" {
+	} else if templateType == "sms" {
 		SmsTemplateList := Array.Templates.SmsTemp
 
 		for _, smsTemp := range SmsTemplateList {
 			if smsTemp.ID == id {
-				 TemplateContent = smsTemp.TemplateContent
+				TemplateContent = smsTemp.TemplateContent
 				return TemplateContent, nil
 			}
 		}
-	}else{
+	} else {
 		return "error", status.Errorf(codes.InvalidArgument, "Invalid template type")
 	}
 
@@ -103,19 +103,20 @@ func AuthenticationMailling(email string, otp string) (bool, error) {
 
 	_, err = sendEmail(email, body, "OTP Verification")
 	if err != nil {
-		panic(err)
+		// panic(err)
+		fmt.Println(err)
 	}
 
 	return true, nil
 }
 
 func BulkEmail(name string, pendingPrice string, course string, Date string, emailAddress string, phoneNumber string, senderEmail string, tempType string, tempId int) (bool, error) {
-	 content, err := LoadTemplate(tempType, tempId)
+	content, err := LoadTemplate(tempType, tempId)
 
-	 if err != nil || content == "error" {
+	if err != nil || content == "error" {
 		fmt.Println(err)
 		return false, status.Errorf(codes.Internal, "could not resolve template %v", err)
-	 }
+	}
 
 	tmp, err := template.New("BatchUploadEmail").Parse(content)
 
@@ -150,11 +151,11 @@ func BulkEmail(name string, pendingPrice string, course string, Date string, ema
 }
 
 func BulkSms(name string, pendingPrice string, course string, Date string, phoneNumber string, senderEmail string, receverNumber string, method string, templateType string, tempId int) (bool, error) {
-	 content, err := LoadTemplate(templateType, tempId)
+	content, err := LoadTemplate(templateType, tempId)
 
-	 if err != nil || content == "error" {
+	if err != nil || content == "error" {
 		return false, status.Errorf(codes.Internal, "could not resolve template %v", err)
-	 }
+	}
 
 	tmp, err := template.New("BatchUploadSMS").Parse(content)
 
