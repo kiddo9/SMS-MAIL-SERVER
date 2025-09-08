@@ -68,7 +68,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var Message string
 
 	
-	if len(EmailId) == 0 && len(EmailId) > 2 && len(smsId) == 0 && len(smsId) > 2 {
+	if len(EmailId) == 0 && len(smsId) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
 	} 
 
