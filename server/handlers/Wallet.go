@@ -59,4 +59,5 @@ func (w *Wallet) BulkSmsWallet(req *pb.BulkSms, stream pb.SmsServices_BulkSmsWal
 	return stream.Send(&pb.BulkSmsResponse{
 		Response: string(body),
 	})
+	
 }
