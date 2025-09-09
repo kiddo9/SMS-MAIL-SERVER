@@ -36,9 +36,9 @@ jobs:
 
       - name: Build and push Client Image
         run: |
-          docker build -t ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.CLIENT_TAG }} ./nginx
+          docker build -f nginx/Dockerfile -t ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.CLIENT_TAG }} .
           docker push ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.CLIENT_TAG }}
-      
+
       - name: Build and push Server Image
         run: |
           docker build -t ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.SERVER_TAG }} ./server
