@@ -25,7 +25,7 @@ const Login = () => {
       const request = await AdminClient.loginAdmin(
         OtpRequest.create({ email: email }),
         {
-          meta: {"recaptcha-token": token},
+          meta: {"x-recaptcha-token": token},
         }
       );
 
