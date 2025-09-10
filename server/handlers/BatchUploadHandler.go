@@ -70,9 +70,9 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var Id int
 	var SmsId int
 
-	// if len(md["send_using"]) == 0 {
-	// 	return nil, status.Errorf(codes.InvalidArgument, "missing argument")
-	// }
+	if len(md["send_using"]) == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
+	}
 
 	if len(EmailId) == 0 && len(smsId) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
