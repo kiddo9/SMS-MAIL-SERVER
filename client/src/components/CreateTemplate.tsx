@@ -1,5 +1,5 @@
 import { useState } from "react"
-import Editor from "./Editor"
+// import Editor from "./Editor"
 import TemplateClient from "../lib/templateClient";
 import { toast } from "react-toastify";
 import { demoTemplate } from "../lib/constants";
@@ -8,7 +8,7 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
     const [loader, setLoader] = useState(false)
     const [name, setName] = useState('')
     const [type, setType] = useState<"email" | "sms">("sms")
-    const [text, setText] = useState('')
+    const [text, setText] = useState(demoTemplate)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         setLoader(true)
@@ -78,7 +78,7 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                 <span>Create Template</span>
                 <img className="" width={30} src="/logo-icon.png" alt="Logo" />
             </div>
-            <div className='px-5 max-h-[40vh] overflow-y-scroll'>
+            <div className='px-5 max-h-[80vh] overflow-y-scroll'>
                 <form onSubmit={handleSubmit} className='flex flex-col'>
                     <fieldset className="mb-4 flex flex-col gap-1">
                         <label className="text-sm" htmlFor="name">
@@ -112,7 +112,22 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                         </select>
                     </fieldset>
                     <p className="text-sm mb-4"><strong>Instructions: </strong>{"You can edit the text below to create a custom template, please do not edit or remove the text in '{ {. } }' symbol"}</p>
-                    <Editor initialText={demoTemplate} setText={setText} />
+                    <fieldset>
+                        <label className="text-sm" htmlFor="text">
+                            Text
+                        </label>
+                        <textarea
+                            onChange={(e) => setText(e.target.value)}
+                            value={text}
+                            className="rounded-lg px-4 py-2 outline-none border-2 border-gray-500 focus:border-[#6699ff] w-full h-[200px]"
+                            id="text"
+                            name="text"
+                            placeholder="Enter template text"
+                            required
+                        >
+                            
+                        </textarea>
+                    </fieldset>
                     <button
                         type="submit"
                         className="border-2 mt-2 border-[#6699ff] mb-5 mx-auto text-[#6699ff] hover:bg-blue-500 hover:text-white px-4 py-2 rounded-lg transition duration-300 ease-in cursor-pointer hover:shadow-2xl"
