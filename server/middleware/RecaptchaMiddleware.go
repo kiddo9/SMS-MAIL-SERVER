@@ -20,7 +20,7 @@ func RecaptchaMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryS
 		return nil, status.Errorf(codes.Unauthenticated, "server responsed with a 404 error")
 	}
 
-	recaptchaToken := md.Get("recaptcha-token")
+	recaptchaToken := md.Get("x-recaptcha-token")
 	fmt.Println(recaptchaToken, recaptchaToken[0])
 	
 	if len(recaptchaToken) == 0 || recaptchaToken[0] == "" {
