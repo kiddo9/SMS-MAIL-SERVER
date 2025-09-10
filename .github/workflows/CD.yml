@@ -48,3 +48,25 @@ jobs:
         run: |
           docker build -t ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.ENVOY_TAG }} .
           docker push ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.ENVOY_TAG }}
+    
+  deploy-to-aws:
+    if: ${{github.event_name != 'pull_request'}}
+    needs: push-to-dockerhub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd nct-sms
+            sudo docker compose down || true
+            sudo docker rmi -f  ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.CLIENT_TAG }} || true
+            sudo docker rmi -f  ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.SERVER_TAG }} || true
+            sudo docker rmi -f  ${{ vars.DOCKER_USERNAME }}/${{ vars.DOCKER_REPO_NAME }}:${{ vars.ENVOY_TAG }} || true
+            sudo docker compose up -d
+            sudo docker cp .env Sms_server:/app/.env
