@@ -3,7 +3,7 @@ import { TemplateServicesClient } from "../proto/Template.client";
 
 
 const transport = new GrpcWebFetchTransport({
-    baseUrl: import.meta.env.VITE_ENVOY_URL
+    baseUrl: '/rpc/s/'
 })
 
 const client = new TemplateServicesClient(transport);
