@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -70,6 +71,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var Id int
 	var SmsId int
 
+	fmt.Fprintln(os.Stderr, "metadata: ", md)
 	if len(md["send_using"]) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
