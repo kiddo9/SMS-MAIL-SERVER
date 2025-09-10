@@ -70,9 +70,9 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var Id int
 	var SmsId int
 
-	if len(md["send_using"]) == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
-	}
+	// if len(md["send_using"]) == 0 {
+	// 	return nil, status.Errorf(codes.InvalidArgument, "missing argument")
+	// }
 
 	if len(EmailId) == 0 && len(smsId) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
@@ -140,8 +140,6 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 			if idx == 0 {
 				continue
 			}
-
-			// fmt.Println(row[0], "0", row[1], "1", row[2], "2", row[3], "3", row[4], "4", row[5], "5", row[6], "6", row[12], "12")
 
 			name := row[0]
 			pendingPrice := row[12]
