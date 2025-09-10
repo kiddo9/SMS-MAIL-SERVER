@@ -70,7 +70,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var Id int
 	var SmsId int
 
-	if len(md["send_using"]) == 0 || len(md["send_using"]) > 2 {
+	if len(md["send_using"]) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
 
