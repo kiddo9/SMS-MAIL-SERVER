@@ -63,8 +63,8 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 	var messageMethod string
 	var MMth string
-	var EmailId []string = md["emailid"]
-	var smsId []string = md["smsid"]
+	var EmailId []string = md["x-emailid"]
+	var smsId []string = md["x-smsid"]
 	var emailIdStr string
 	var smsIdStr string
 	var Message string
@@ -72,7 +72,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	var SmsId int
 
 	fmt.Fprintln(os.Stderr, "metadata: ", md)
-	if len(md["send_using"]) == 0 {
+	if len(md["x-send_using"]) == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
 	}
 
@@ -80,7 +80,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
 	}
 
-	if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")) {
+	if contains(md["x-send_using"], "email") && (contains(md["x-send_using"], "Bulksms") || contains(md["x-send_using"], "EBulksms")) {
 		emailIdStr = EmailId[0]
 		smsIdStr = smsId[0]
 
@@ -95,7 +95,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		if err != nil {
 			return nil, err
 		}
-	} else if contains(md["send_using"], "email") {
+	} else if contains(md["x-send_using"], "email") {
 		emailIdStr = EmailId[0]
 
 		Id, err = strconv.Atoi(emailIdStr)
@@ -103,7 +103,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		if err != nil {
 			return nil, err
 		}
-	} else if contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms") {
+	} else if contains(md["x-send_using"], "Bulksms") || contains(md["x-send_using"], "EBulksms") {
 		smsIdStr = smsId[0]
 
 		SmsId, err = strconv.Atoi(smsIdStr)
@@ -150,8 +150,8 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 			email := row[5]
 
 			if strings.TrimSpace(pendingPrice) != "" {
-				if contains(md["send_using"], "email") && (contains(md["send_using"], "Bulksms") || contains(md["send_using"], "EBulksms")) {
-					if contains(md["send_using"], "EBulksms") {
+				if contains(md["x-send_using"], "email") && (contains(md["x-send_using"], "Bulksms") || contains(md["x-send_using"], "EBulksms")) {
+					if contains(md["x-send_using"], "EBulksms") {
 						MMth = "EBulksms"
 					} else {
 						MMth = "Bulksms"
@@ -170,7 +170,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 					Message = "email and sms sent"
 				} else {
-					for _, method := range md["send_using"] {
+					for _, method := range md["x-send_using"] {
 						if method != "email" && method != "Bulksms" && method != "EBulksms" {
 							return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
 						}
