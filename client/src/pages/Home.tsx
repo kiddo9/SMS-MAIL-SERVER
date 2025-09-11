@@ -92,6 +92,7 @@ const Home = () => {
       console.log(meta);
       reader.onload = async(event) => {
         try {
+          setUploading(true);
           const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
           const uint8Array = new Uint8Array(arrayBuffer);
           const request = await FileUploadClient.fileUpload({
