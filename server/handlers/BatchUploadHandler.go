@@ -63,8 +63,8 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 	var messageMethod string
 	var MMth string
-	var EmailId []string = md["x-emailid"]
-	var smsId []string = md["x-smsid"]
+	var EmailId []string = md["x-email-id"]
+	var smsId []string = md["x-sms-id"]
 	var emailIdStr string
 	var smsIdStr string
 	var Message string
