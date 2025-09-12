@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"time"
 
@@ -32,7 +33,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorizied request. request denied")
 	}
 
-	authToken := md.Get("auth-token")
+	authToken := md.Get("x-auth-token")
 	if len(authToken) == 0 {
 		return nil, status.Errorf(codes.Unauthenticated, "requested denied")
 	}
@@ -104,6 +105,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 
 						md.Set("auth-token", newToken)
 						ctx = metadata.NewIncomingContext(ctx, md)
+						fmt.Println(md, ctx)
 					} else {
 						return nil, status.Errorf(codes.Unauthenticated, "expired")
 					}

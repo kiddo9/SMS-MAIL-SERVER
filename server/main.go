@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kiddo9/SMS-MAIL-SERVER/handlers"
 	pb "github.com/kiddo9/SMS-MAIL-SERVER/message/proto"
+	"github.com/kiddo9/SMS-MAIL-SERVER/middleware"
 	"google.golang.org/grpc"
 )
 
@@ -20,7 +21,7 @@ func init() {
 }
 
 func main() {
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(middleware.Interceptors(middleware.RecaptchaMiddleware, middleware.AuthMiddleware))
 	port := os.Getenv("PORT")
 
 	lis, err := net.Listen("tcp", ":"+port)
