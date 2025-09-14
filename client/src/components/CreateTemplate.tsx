@@ -66,7 +66,7 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                             'x-recaptcha-token': token
                         }
                     })
-                    console.log(request);
+                    // console.log(request);
                     const response = request.response;
                     if(response.status == true){
                         toast.success(response.message);
