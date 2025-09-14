@@ -1,16 +1,32 @@
 import React from 'react'
 import { toast } from 'react-toastify';
 import TemplateClient from '../lib/templateClient';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useAuthContext } from '../contexts/AuthContext';
 
 
 const DeleteTemplate = ({setOpenDelete, type, name, id, setReload}: {setOpenDelete: React.Dispatch<React.SetStateAction<boolean>>, type: 'email' | 'sms' | undefined, name: string, id: string, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = React.useState(false);
+    const {executeRecaptcha} = useGoogleReCaptcha();
+    const {atk} = useAuthContext();
     const handleDelete = async() => {
         setLoader(true);
+
+        if (!executeRecaptcha) {
+            toast.error("Execute recaptcha not yet available");
+            return;
+        }
+
+        const token = await executeRecaptcha('delete');
         try {
             const request = await TemplateClient.deleteTemplate({
                 type: type as 'email' | 'sms',
                 id
+            }, {
+                meta: {
+                    'x-recaptcha-token': token,
+                    'x-auth-token': atk
+                }
             });
             const response = request.response;
             if(response.status == true){

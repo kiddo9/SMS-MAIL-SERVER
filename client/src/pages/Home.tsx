@@ -6,6 +6,8 @@ import Hero from '../components/Hero';
 import { toast } from 'react-toastify';
 import TemplatePicker from '../components/TemplatePicker';
 import type { SmsTemplate, Template } from '../proto/Template';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useAuthContext } from '../contexts/AuthContext';
 
 const Home = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -13,6 +15,9 @@ const Home = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'success' | 'error' | null>(null); // 'success', 'error', null
   const [selectedTemplate, setSelectedTemplate] = useState<{ template: Template | SmsTemplate, type: "email" | "sms" } | null>(null);
+
+  const {atk} = useAuthContext()
+  const {executeRecaptcha} = useGoogleReCaptcha();
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -63,6 +68,13 @@ const Home = () => {
     
     setUploading(true);
 
+    if (!executeRecaptcha) {
+      toast.error("Execute recaptcha not yet available");
+      return;
+    }
+
+    const token = await executeRecaptcha('create');
+
     if(!selectedTemplate || !selectedTemplate.template || !selectedTemplate.type) {
       toast.error("Please select a template.");
       setUploading(false);
@@ -74,11 +86,15 @@ const Home = () => {
       meta = { 
         'x-send-using': 'email',
         'x-email-id': selectedTemplate.template.id.toString(),
+        'x-auth-token': atk,
+        'x-recaptcha-token': token
       }
     } else if(selectedTemplate.type === "sms") {
       meta = { 
         'x-send-using': 'EBulksms',
         'x-sms-id': selectedTemplate.template.id.toString(),
+        'x-auth-token': atk,
+        'x-recaptcha-token': token
       }
     }else{
       toast.error("Please select a template.");
@@ -89,8 +105,9 @@ const Home = () => {
     // Simulate file processing
     try {
       const reader = new FileReader();
-      console.log(meta);
+      // console.log(meta);
       reader.onload = async(event) => {
+
         try {
           setUploading(true);
           const arrayBuffer = event.target?.result as ArrayBuffer;   // raw file bytes
@@ -112,7 +129,7 @@ const Home = () => {
 
           const response = request.response;
 
-          console.log(response);
+          // console.log(response);
           if(response.status == true){
             toast.success(response.message);
             setUploadStatus('success');

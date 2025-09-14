@@ -3,6 +3,8 @@ import { useState } from "react"
 import TemplateClient from "../lib/templateClient";
 import { toast } from "react-toastify";
 import { demoTemplate } from "../lib/constants";
+import { useAuthContext } from "../contexts/AuthContext";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispatch<React.SetStateAction<boolean>>, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = useState(false)
@@ -10,9 +12,18 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
     const [type, setType] = useState<"email" | "sms">("sms")
     const [text, setText] = useState(demoTemplate)
 
+    const {atk} = useAuthContext()
+    const {executeRecaptcha} = useGoogleReCaptcha();
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         setLoader(true)
         e.preventDefault();
+        if (!executeRecaptcha) {
+            toast.error("Execute recaptcha not yet available");
+            return;
+        }
+
+        const token = await executeRecaptcha('create');
         {/*CREATE API GOES HERE */}
         switch (type) {
             case "email":
@@ -21,6 +32,11 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                         date: new Date(Date.now()).toString(),
                         templateContent: text,
                         templateName: name
+                    },{
+                        meta: {
+                            'x-auth-token': atk,
+                            'x-recaptcha-token': token
+                        }
                     })
                     const response = request.response;
                     if(response.status == true){
@@ -44,7 +60,13 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                         date: new Date(Date.now()).toString(),
                         smsTemplateContent: text,
                         smsTemplateName: name
+                    }, {
+                        meta: {
+                            'x-auth-token': atk,
+                            'x-recaptcha-token': token
+                        }
                     })
+                    console.log(request);
                     const response = request.response;
                     if(response.status == true){
                         toast.success(response.message);

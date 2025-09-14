@@ -28,7 +28,7 @@ static_resources:
                               allow_origin_string_match:
                                 - prefix: "*"
                               allow_methods: "POST, GET, OPTIONS"
-                              allow_headers: "content-type,x-grpc-web,x-send-using,x-recaptcha-token,x-email-id,x-sms-id"
+                              allow_headers: "content-type,x-grpc-web,x-send-using,x-recaptcha-token,x-email-id,x-sms-id,x-auth-token"
                               max_age: "86400"
                               expose_headers: "grpc-status,grpc-message"
                 http_filters:
@@ -58,5 +58,5 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: server
+                      address: host.docker.internal
                       port_value: 9001

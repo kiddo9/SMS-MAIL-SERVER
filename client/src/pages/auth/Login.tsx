@@ -3,6 +3,7 @@ import AdminClient from "../../lib/adminClient";
 import { OtpRequest } from "../../proto/Admin";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,7 +17,7 @@ const Login = () => {
       e.preventDefault();
       setLoading(true);
       if (!executeRecaptcha) {
-        console.log("Execute recaptcha not yet available");
+        toast.error("Execute recaptcha not yet available");
         return;
       }
 
