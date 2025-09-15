@@ -44,7 +44,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 	decerptedToken, _ := utils.ValidateToken(authToken[0])
 
 	details, ok := decerptedToken.Claims.(jwt.MapClaims)
-	if !ok || !decerptedToken.Valid {
+	if !ok {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid request")
 	}
 
@@ -69,46 +69,52 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 		return nil, status.Errorf(codes.Internal, "internal server error")
 	}
 
-	for _, admin := range admins {
-		if details["uuid"] == admin.Uuid {
-			if admin.APIKey == details["APIKey"] {
-				jwtExpired := details["exp"].(float64)
+	if !decerptedToken.Valid {
+		if details["uuid"] == nil || details["APIKey"] == nil || details["exp"] == nil {
+			return nil, status.Errorf(codes.Unauthenticated, "invalid token")
+		}
 
-				if time.Now().Unix() > int64(jwtExpired) {
-					GetAdminLongTermToken := admin.Jwt
+		for _, admin := range admins {
+			if details["uuid"] == admin.Uuid {
+				if admin.APIKey == details["APIKey"] {
+					jwtExpired := details["exp"].(float64)
 
-					validateToken, err := utils.ValidateToken(GetAdminLongTermToken)
-					if err != nil {
-						return nil, status.Errorf(codes.Unauthenticated, "unkown user")
-					}
+					if time.Now().Unix() > int64(jwtExpired) {
+						GetAdminLongTermToken := admin.Jwt
 
-					infoData, ok := validateToken.Claims.(jwt.MapClaims)
-					if !ok || !validateToken.Valid {
-						return nil, status.Errorf(codes.Unauthenticated, "unkown")
-					}
-
-					if time.Now().Unix() < int64(infoData["exp"].(float64)) {
-						details["uuid"] = infoData["uuid"]
-						details["APIKey"] = infoData["APIKey"]
-
-						newToken, err := utils.GenerateRequestJWTToken(
-							infoData["uuid"].(string),
-							infoData["APIKey"].(string),
-						)
-
+						validateToken, err := utils.ValidateToken(GetAdminLongTermToken)
 						if err != nil {
-							return nil, status.Errorf(codes.Internal, "internal server error")
+							return nil, status.Errorf(codes.Unauthenticated, "unkown user")
 						}
 
-						md.Set("auth-token", newToken)
-						ctx = metadata.NewIncomingContext(ctx, md)
-						fmt.Println(md, ctx)
-					} else {
-						return nil, status.Errorf(codes.Unauthenticated, "expired")
+						infoData, ok := validateToken.Claims.(jwt.MapClaims)
+						if !ok || !validateToken.Valid {
+							return nil, status.Errorf(codes.Unauthenticated, "unkown")
+						}
+
+						if time.Now().Unix() < int64(infoData["exp"].(float64)) {
+							details["uuid"] = infoData["uuid"]
+							details["APIKey"] = infoData["APIKey"]
+
+							newToken, err := utils.GenerateRequestJWTToken(
+								infoData["uuid"].(string),
+								infoData["APIKey"].(string),
+							)
+
+							if err != nil {
+								return nil, status.Errorf(codes.Internal, "internal server error")
+							}
+
+							md.Set("auth-token", newToken)
+							ctx = metadata.NewIncomingContext(ctx, md)
+							fmt.Println(md, ctx)
+						} else {
+							return nil, status.Errorf(codes.Unauthenticated, "expired")
+						}
 					}
 				}
+				break
 			}
-			break
 		}
 	}
 
