@@ -41,10 +41,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 		return nil, status.Errorf(codes.Unauthenticated, "invalid request. request terminated")
 	}
 
-	decerptedToken, err := utils.ValidateToken(authToken[0])
-	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid aurgument")
-	}
+	decerptedToken, _ := utils.ValidateToken(authToken[0])
 
 	details, ok := decerptedToken.Claims.(jwt.MapClaims)
 	if !ok || !decerptedToken.Valid {
@@ -53,7 +50,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 
 	fileName := "storage/admin.json"
 
-	_, err = os.Open(fileName)
+	_, err := os.Open(fileName)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "internal server error")
