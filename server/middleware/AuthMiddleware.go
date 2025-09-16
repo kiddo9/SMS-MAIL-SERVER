@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"time"
 
@@ -34,50 +33,50 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 	}
 
 	authToken := md.Get("x-auth-token")
-	if len(authToken) == 0 {
-		return nil, status.Errorf(codes.Unauthenticated, "requested denied")
-	}
-	if len(authToken) > 1 {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid request. request terminated")
+	if len(authToken) != 1 {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid auth token")
 	}
 
-	decerptedToken, _ := utils.ValidateToken(authToken[0])
+	decerptedToken, err := utils.ValidateToken(authToken[0])
+	if err != nil || !decerptedToken.Valid {
+	
+		details, ok := decerptedToken.Claims.(jwt.MapClaims)
+		
+		if !ok {
+			return nil, status.Errorf(codes.Unauthenticated, "invalid request")
+		}
 
-	details, ok := decerptedToken.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid request")
-	}
-
-	fileName := "storage/admin.json"
-
-	_, err := os.Open(fileName)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "internal server error")
-	}
-
-	data, err := os.ReadFile(fileName)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "internal server error")
-	}
-
-	var admins []structures.AdminStructs
-	err = json.Unmarshal(data, &admins)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "internal server error")
-	}
-
-	if !decerptedToken.Valid {
 		if details["uuid"] == nil || details["APIKey"] == nil || details["exp"] == nil {
 			return nil, status.Errorf(codes.Unauthenticated, "invalid token")
 		}
 
+		fileName := "storage/admin.json"
+
+		_, err = os.Open(fileName)
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "internal server error")
+		}
+
+		data, err := os.ReadFile(fileName)
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "internal server error")
+		}
+
+		var admins []structures.AdminStructs
+		err = json.Unmarshal(data, &admins)
+
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "internal server error")
+		}
+
+		jwtExpired := details["exp"].(float64)
+
 		for _, admin := range admins {
+
 			if details["uuid"] == admin.Uuid {
 				if admin.APIKey == details["APIKey"] {
-					jwtExpired := details["exp"].(float64)
 
 					if time.Now().Unix() > int64(jwtExpired) {
 						GetAdminLongTermToken := admin.Jwt
@@ -105,9 +104,7 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 								return nil, status.Errorf(codes.Internal, "internal server error")
 							}
 
-							md.Set("auth-token", newToken)
-							ctx = metadata.NewIncomingContext(ctx, md)
-							fmt.Println(md, ctx)
+							grpc.SendHeader(ctx, metadata.Pairs("x-auth-token", newToken))
 						} else {
 							return nil, status.Errorf(codes.Unauthenticated, "expired")
 						}
@@ -117,7 +114,6 @@ func AuthMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryServer
 			}
 		}
 	}
-
+	
 	return handler(ctx, req)
-
 }
