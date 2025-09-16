@@ -77,11 +77,11 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest) (*pb.
 		validateLongTermToken, err := utils.ValidateToken(emails.Jwt)
 		jwtLongTerm := ""
 
+		fmt.Println("reached layer one")
 		if err != nil || !validateLongTermToken.Valid || emails.Jwt == "" {
 
-			if emails.Jwt == "" {
-
-			}else {
+			if emails.Jwt != "" {
+				fmt.Println("reached layer two")
 				cliams, ok := validateLongTermToken.Claims.(jwt.MapClaims)
 
 				if !ok {
@@ -91,15 +91,19 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest) (*pb.
 				if cliams["uuid"] == nil || cliams["APIKey"] == nil || cliams["exp"] == nil{
 					return nil, status.Errorf(codes.Unauthenticated, "invalid token please contact your developers")
 				}
+
+				fmt.Println("passed layer two")
 			}
 
 			jwtLongTerm, err = utils.GenerateJWTTokenLongTerm(email, emails.Uuid, emails.APIKey)
+			fmt.Println("reached layer three")
 
 			if err != nil {
 				return nil, status.Errorf(codes.Canceled, "unable to complete request try again")
 			}
 		}
 
+		fmt.Println("reached layer fourth")
 		tokenExpiry := time.Now().Add(time.Minute * 5).Unix()
 		// Generate JWT token
 		jwtToken, err = utils.GenerateJWTToken(emails.Email, emails.Uuid, emails.APIKey, tokenExpiry)
