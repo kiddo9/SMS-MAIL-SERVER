@@ -74,6 +74,32 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest) (*pb.
 			return nil, status.Errorf(codes.NotFound, "request returned a 404 response")
 		}
 
+		validateLongTermToken, err := utils.ValidateToken(emails.Jwt)
+		jwtLongTerm := ""
+
+		if err != nil || !validateLongTermToken.Valid || emails.Jwt == "" {
+
+			if emails.Jwt == "" {
+
+			}else {
+				cliams, ok := validateLongTermToken.Claims.(jwt.MapClaims)
+
+				if !ok {
+					return nil, status.Errorf(codes.Unauthenticated, "invalid token")
+				}
+
+				if cliams["uuid"] == nil || cliams["APIKey"] == nil || cliams["exp"] == nil{
+					return nil, status.Errorf(codes.Unauthenticated, "invalid token please contact your developers")
+				}
+			}
+
+			jwtLongTerm, err = utils.GenerateJWTTokenLongTerm(email, emails.Uuid, emails.APIKey)
+
+			if err != nil {
+				return nil, status.Errorf(codes.Canceled, "unable to complete request try again")
+			}
+		}
+
 		tokenExpiry := time.Now().Add(time.Minute * 5).Unix()
 		// Generate JWT token
 		jwtToken, err = utils.GenerateJWTToken(emails.Email, emails.Uuid, emails.APIKey, tokenExpiry)
@@ -85,6 +111,7 @@ func (h *AdminHandler) LoginAdmin(ctx context.Context, req *pb.OtpRequest) (*pb.
 
 		emails.OTP = token
 		emails.OTPExpiry = fmt.Sprintf("%v", tokenExpiry)
+		emails.Jwt = jwtLongTerm
 
 		admins[idx] = emails
 
