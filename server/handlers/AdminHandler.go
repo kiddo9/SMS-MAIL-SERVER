@@ -283,7 +283,7 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 		}
 
 		user := structures.AdminStructs{
-			//Email:     admin.Email,
+			Email:     admin.Email,
 			Uuid:      admin.Uuid,
 			APIKey:    admin.APIKey,
 			OTP:       admin.OTP,
@@ -305,41 +305,69 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 			return nil, status.Errorf(codes.PermissionDenied, "otp has expired")
 		}
 
-		validateLongTermToken, err := utils.ValidateToken(user.Jwt)
-		if err != nil {
-			return nil, status.Errorf(codes.Unauthenticated, "invalid long term token: %v", err)
-		}
+		if user.Jwt != "" {
+			validateLongTermToken, err := utils.ValidateToken(user.Jwt)
+			if err != nil {
+				return nil, status.Errorf(codes.Unauthenticated, "invalid long term token: %v", err)
+			}
 
-		infoData, ok := validateLongTermToken.Claims.(jwt.MapClaims)
-		if !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "invalid long term token")
-		}
-		if !validateLongTermToken.Valid {
-			// Generate a new long-term token if the existing one has expired
+			infoData, ok := validateLongTermToken.Claims.(jwt.MapClaims)
+			if !ok {
+				return nil, status.Errorf(codes.Unauthenticated, "invalid long term token")
+			}
+
+				if !validateLongTermToken.Valid {
+				// Generate a new long-term token if the existing one has expired
+				newLongTermToken, err := utils.GenerateJWTTokenLongTerm(
+					infoData["email"].(string),
+					infoData["uuid"].(string),
+					infoData["APIKey"].(string),
+				)
+
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "unable to generate tokens")
+				}
+
+				user.Jwt = newLongTermToken
+
+				// Update the admin data with the new long-term token
+				admin.Jwt = newLongTermToken
+
+				// Save the updated admin data back to the file
+				updateData, err := json.MarshalIndent(admins, "", "")
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "could not marshal updated admin data: %v", err)
+				}
+
+				if err := os.WriteFile(fileName, updateData, 0644); err != nil {
+					return nil, status.Errorf(codes.Internal, "could not write updated admin data to file: %v", err)
+				}
+			}
+		}else {
 			newLongTermToken, err := utils.GenerateJWTTokenLongTerm(
-				infoData["email"].(string),
-				infoData["uuid"].(string),
-				infoData["APIKey"].(string),
-			)
+					user.Email,
+					user.Uuid,
+					user.APIKey,
+				)
 
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "unable to generate tokens")
-			}
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "unable to generate tokens")
+				}
 
-			user.Jwt = newLongTermToken
+				user.Jwt = newLongTermToken
 
-			// Update the admin data with the new long-term token
-			admin.Jwt = newLongTermToken
+				// Update the admin data with the new long-term token
+				admin.Jwt = newLongTermToken
 
-			// Save the updated admin data back to the file
-			updateData, err := json.MarshalIndent(admins, "", "")
-			if err != nil {
-				return nil, status.Errorf(codes.Internal, "could not marshal updated admin data: %v", err)
-			}
+				// Save the updated admin data back to the file
+				updateData, err := json.MarshalIndent(admins, "", "")
+				if err != nil {
+					return nil, status.Errorf(codes.Internal, "could not marshal updated admin data: %v", err)
+				}
 
-			if err := os.WriteFile(fileName, updateData, 0644); err != nil {
-				return nil, status.Errorf(codes.Internal, "could not write updated admin data to file: %v", err)
-			}
+				if err := os.WriteFile(fileName, updateData, 0644); err != nil {
+					return nil, status.Errorf(codes.Internal, "could not write updated admin data to file: %v", err)
+				}
 		}
 		// generate login request token
 		loginRequestToken, err = utils.GenerateRequestJWTToken(user.Uuid, user.APIKey)
@@ -348,8 +376,6 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 			return nil, status.Errorf(codes.Internal, "could not generate login request token: %v", err)
 		}
 	}
-
-	fmt.Print(loginRequestToken)
 
 	return &pb.OtpVerificationResponse{
 		IsVerified: true,
