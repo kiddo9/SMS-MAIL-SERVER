@@ -312,10 +312,10 @@ func (h *AdminHandler) VerifyOtp(ctx context.Context, req *pb.OtpVerificationReq
 		}
 
 		infoData, ok := validateLongTermToken.Claims.(jwt.MapClaims)
-		if !ok || !validateLongTermToken.Valid {
+		if !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "invalid long term token")
 		}
-		if time.Now().Unix() > int64(infoData["exp"].(float64)) {
+		if !validateLongTermToken.Valid {
 			// Generate a new long-term token if the existing one has expired
 			newLongTermToken, err := utils.GenerateJWTTokenLongTerm(
 				infoData["email"].(string),
