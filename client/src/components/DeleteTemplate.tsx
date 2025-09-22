@@ -8,7 +8,7 @@ import { useAuthContext } from '../contexts/AuthContext';
 const DeleteTemplate = ({setOpenDelete, type, name, id, setReload}: {setOpenDelete: React.Dispatch<React.SetStateAction<boolean>>, type: 'email' | 'sms' | undefined, name: string, id: string, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = React.useState(false);
     const {executeRecaptcha} = useGoogleReCaptcha();
-    const {atk} = useAuthContext();
+    const {atk, setAtkFunc, logout} = useAuthContext();
     const handleDelete = async() => {
         setLoader(true);
 
@@ -31,6 +31,7 @@ const DeleteTemplate = ({setOpenDelete, type, name, id, setReload}: {setOpenDele
             const response = request.response;
             if(response.status == true){
                 toast.success(response.message);
+                setAtkFunc(request.requestHeaders['x-auth-token'] as string);
                 setOpenDelete(false);
                 setReload(true);
                 return
@@ -38,6 +39,9 @@ const DeleteTemplate = ({setOpenDelete, type, name, id, setReload}: {setOpenDele
             toast.error(response.message);
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+            if(error instanceof Error && error.message=="unkown user"){
+                logout();
+            }
             if(import.meta.env.VITE_ENV === "development") console.error(error);
         }finally{
             setLoader(false);

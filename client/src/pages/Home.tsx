@@ -16,7 +16,7 @@ const Home = () => {
   const [uploadStatus, setUploadStatus] = useState<'success' | 'error' | null>(null); // 'success', 'error', null
   const [selectedTemplate, setSelectedTemplate] = useState<{ template: Template | SmsTemplate, type: "email" | "sms" } | null>(null);
 
-  const {atk} = useAuthContext()
+  const {atk, setAtkFunc, logout} = useAuthContext()
   const {executeRecaptcha} = useGoogleReCaptcha();
 
   const handleDrag = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -132,12 +132,16 @@ const Home = () => {
           // console.log(response);
           if(response.status == true){
             toast.success(response.message);
+            setAtkFunc(request.requestHeaders['x-auth-token'] as string);
             setUploadStatus('success');
             return
           }
           setUploadStatus('error');
           } catch (error) {
             toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+            if(error instanceof Error && error.message=="unkown user"){
+              logout();
+            }
             if(import.meta.env.VITE_ENV === "development") console.error(error);
             setUploadStatus('error');
           } finally {

@@ -12,7 +12,7 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
     const [type, setType] = useState<"email" | "sms">("sms")
     const [text, setText] = useState(demoTemplate)
 
-    const {atk} = useAuthContext()
+    const {atk, setAtkFunc, logout} = useAuthContext()
     const {executeRecaptcha} = useGoogleReCaptcha();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,6 +41,7 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                     const response = request.response;
                     if(response.status == true){
                         toast.success(response.message);
+                        setAtkFunc(request.requestHeaders['x-auth-token'] as string);
                         setOpenCreate(false);
                         setReload(true);
                         return
@@ -48,6 +49,9 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                     toast.error(response.message);
                 } catch (error) {
                     toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+                    if(error instanceof Error && error.message=="unkown user"){
+                        logout();
+                    }
                     if(import.meta.env.VITE_ENV === "development") console.error(error);
                     
                 }finally{
@@ -70,6 +74,8 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                     const response = request.response;
                     if(response.status == true){
                         toast.success(response.message);
+                        // console.log(request.requestHeaders['x-auth-token']);
+                        setAtkFunc(request.requestHeaders['x-auth-token'] as string);
                         setOpenCreate(false);
                         setReload(true);
                         return
@@ -77,6 +83,9 @@ const CreateTemplate = ({setOpenCreate, setReload}: {setOpenCreate: React.Dispat
                     toast.error(response.message);
                 } catch (error) {
                     toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+                    if(error instanceof Error && error.message=="unkown user"){
+                        logout();
+                    }
                     if(import.meta.env.VITE_ENV === "development") console.error(error);
                     
                 }finally{

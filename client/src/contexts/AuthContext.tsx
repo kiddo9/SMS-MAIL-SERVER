@@ -1,17 +1,20 @@
 import { createContext, useContext, useEffect, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 
 
 const Context  = createContext<{
     atk: string, 
-    setAtkFunc: (newToken: string) => void
+    setAtkFunc: (newToken: string) => void,
+    logout: () => void
 }>({
     atk: "", 
-    setAtkFunc: () => {}
+    setAtkFunc: () => {},
+    logout: () => {}
 })
 const AuthContextProvider = ({children}: {children: React.ReactNode}) => {
   const [atk, setAtk] = useState("")
   const path = useLocation().pathname
+  const nav = useNavigate()
 
 
 
@@ -22,11 +25,11 @@ const AuthContextProvider = ({children}: {children: React.ReactNode}) => {
       setAtk(savedToken);
     }
     else if(!path.includes("/auth/") && !atk){
-        window.location.href = "/auth/login"
+        nav("/auth/login")
         return
     } 
     else return
-  }, [atk, path]);
+  }, [atk, path, nav]);
 
   const setAtkFunc = (newToken: string) => {
     if (newToken) {
@@ -38,12 +41,18 @@ const AuthContextProvider = ({children}: {children: React.ReactNode}) => {
     }
   };
 
+  const logout = () => {
+    setAtkFunc("")
+  }
+
   
 
 
-  
+  if(!path.includes("/auth/") && !atk){
+    return null
+  } 
   return (
-    <Context.Provider value={{atk, setAtkFunc}}>
+    <Context.Provider value={{atk, setAtkFunc, logout}}>
         {children}
     </Context.Provider>
   )
