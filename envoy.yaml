@@ -28,7 +28,8 @@ static_resources:
                               allow_origin_string_match:
                                 - prefix: "*"
                               allow_methods: "POST, GET, OPTIONS"
-                              allow_headers: "content-type,x-grpc-web,x-send-using,x-recaptcha-token,x-email-id,x-sms-id,x-auth-token"
+                              # allow_headers: "content-type,x-grpc-web,x-send-using,x-recaptcha-token,x-email-id,x-sms-id,x-auth-token"
+                              allow_headers: "*"
                               max_age: "86400"
                               expose_headers: "grpc-status,grpc-message"
                 http_filters:
@@ -44,12 +45,12 @@ static_resources:
   clusters:
     - name: admin_service
       connect_timeout: 50s
-      type: LOGICAL_DNS
-      typed_extension_protocol_options:
-        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
-          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
-          explicit_http_config:
-            http2_protocol_options: {}
+      type: STATIC # <--- CHANGE from LOGICAL_DNS to STATIC
+      # typed_extension_protocol_options:
+      #   envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+      #     "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+      #     explicit_http_config:
+      #       http2_protocol_options: {}
       lb_policy: ROUND_ROBIN
       load_assignment:
         cluster_name: admin_service
@@ -58,5 +59,6 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: host.docker.internal
+                      # CHANGE the address to the IPv4 address of the host machine
+                      address: 127.0.0.1 # <--- CHANGE THIS
                       port_value: 9001

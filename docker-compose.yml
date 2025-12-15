@@ -10,16 +10,30 @@ services:
   #   # volumes:
   #   #   - ./server:/app
 
+  # envoy:
+  #   image: envoyproxy/envoy:dev-d4a94e75908cd65d159101ebf3fa9e106be62491
+  #   container_name: Neo_envoy
+  #   ports:
+  #     - 8080:8080
+  #     - 9901:9901
+  #   volumes:
+  #     - ./envoy.yaml:/etc/envoy/envoy.yaml
+  # depends_on:
+  #   - server
+
   envoy:
     image: envoyproxy/envoy:dev-d4a94e75908cd65d159101ebf3fa9e106be62491
     container_name: Neo_envoy
-    ports:
-      - 8080:8080
-      - 9901:9901
+    # 🌟 REMOVE THE PORTS SECTION 🌟
+    # ports:
+    #   - 8080:8080
+    #   - 9901:9901
+
+    # 🌟 ADD THE HOST NETWORK MODE 🌟
+    network_mode: host
+
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
-    # depends_on:
-    #   - server
 
   # nginx_client:
   #   build:

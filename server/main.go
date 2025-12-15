@@ -22,9 +22,10 @@ func init() {
 
 func main() {
 	grpcServer := grpc.NewServer(middleware.Interceptors(middleware.RecaptchaMiddleware, middleware.AuthMiddleware))
+	//grpcServer := grpc.NewServer()
 	port := os.Getenv("PORT")
 
-	lis, err := net.Listen("tcp", ":"+port)
+	lis, err := net.Listen("tcp4", "0.0.0.0:"+port)
 
 	runningMessage := fmt.Sprintf("Server is running on port %s, address includes %s", port, lis.Addr())
 	fmt.Println(runningMessage)

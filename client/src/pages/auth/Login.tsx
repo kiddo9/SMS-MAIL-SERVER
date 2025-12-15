@@ -26,7 +26,7 @@ const Login = () => {
       const request = await AdminClient.loginAdmin(
         OtpRequest.create({ email: email }),
         {
-          meta: {"x-recaptcha-token": token},
+          meta: { "x-recaptcha-token": token },
         }
       );
 
@@ -38,6 +38,8 @@ const Login = () => {
       nav(`/auth/verify?tk=${request.response.message}`);
     } catch (error) {
       if (import.meta.env.VITE_ENV === "development") console.log(error);
+      console.log(error);
+
       setError("Failed to login");
     } finally {
       setLoading(false);
