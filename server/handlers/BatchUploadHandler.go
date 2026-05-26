@@ -3,12 +3,8 @@ package handlers
 import (
 	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
 	"io"
 	"log"
-	"os"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -34,9 +30,9 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
+// goroutine function
 func messageWorker(
 	jobs <-chan structures.MessageJob,
-	//config *Config,
 	wg *sync.WaitGroup,
 ) {
 	defer wg.Done()
@@ -95,91 +91,18 @@ func messageWorker(
 }
 
 func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadRequest) (*pb.FileUploadResponse, error) {
-	var datas []byte
-	var body []structures.AdminStructs
-	var Admin structures.AdminStructs
-
-	_, err := os.Open(fileName)
-
-	if err != nil {
-		panic(err)
-	}
-
-	datas, err = os.ReadFile(fileName)
-
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(datas, &body)
-	if err != nil {
-		panic(err)
-	}
-
-	Admin = body[0]
 
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.Unauthenticated, "missing metadata")
 	}
 
-	// var messageMethod string
-	// var MMth string
-	var EmailId []string = md["x-email-id"]
-	var smsId []string = md["x-sms-id"]
-	var emailIdStr string
-	var smsIdStr string
 	var Message string
-	var Id int
-	var SmsId int
 
-	fmt.Fprintln(os.Stderr, "metadata: ", md)
-	if len(md["x-send-using"]) == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "missing argument")
-	}
-
-	if len(EmailId) == 0 && len(smsId) == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "missing emailId or smsId")
-	}
-
-	if contains(md["x-send-using"], "email") && (contains(md["x-send-using"], "Bulksms") || contains(md["x-send-using"], "EBulksms")) {
-		emailIdStr = EmailId[0]
-		smsIdStr = smsId[0]
-
-		Id, err = strconv.Atoi(emailIdStr)
-
-		if err != nil {
-			return nil, err
-		}
-
-		SmsId, err = strconv.Atoi(smsIdStr)
-
-		if err != nil {
-			return nil, err
-		}
-	} else if contains(md["x-send-using"], "email") {
-		emailIdStr = EmailId[0]
-
-		Id, err = strconv.Atoi(emailIdStr)
-
-		if err != nil {
-			return nil, err
-		}
-	} else if contains(md["x-send-using"], "Bulksms") || contains(md["x-send-using"], "EBulksms") {
-		smsIdStr = smsId[0]
-
-		SmsId, err = strconv.Atoi(smsIdStr)
-
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
-	}
 	jobs := make(chan structures.MessageJob, 100)
 	wg := sync.WaitGroup{}
 
-	numWorkers := 10 // 🔑 MAX concurrent messages
+	numWorkers := 10
 
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
@@ -188,6 +111,16 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 
 	file := req.GetContent()
 	data := req.GetDate()
+	EmailId := req.GetEmailId()
+	SmsId := req.GetSmsId()
+
+	var requiredColumns = map[string]bool{
+		"name":         false,
+		"course":       false,
+		"phone":        false,
+		"email":        false,
+		"pendingprice": false,
+	}
 
 	readFile, err := excelize.OpenReader(io.NopCloser(bytes.NewReader(file)))
 
@@ -196,6 +129,7 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 	}
 
 	//result := make(map[string][][]string)
+	headerIndex := make(map[string]int)
 
 	sheets := readFile.GetSheetList()
 
@@ -207,6 +141,25 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 		}
 
 		//result[sheet] = rows
+		headerRow := rows[0]
+
+		for idx, header := range headerRow {
+			h := strings.ToLower(strings.TrimSpace(header))
+			if _, exists := requiredColumns[h]; exists {
+				headerIndex[h] = idx
+				requiredColumns[h] = true
+			}
+		}
+
+		for col, found := range requiredColumns {
+			if !found {
+				return nil, status.Errorf(
+					codes.InvalidArgument,
+					"missing required column: %s",
+					col,
+				)
+			}
+		}
 
 		for idx, row := range rows {
 
@@ -214,88 +167,21 @@ func (f *FileUploadStruct) FileUpload(ctx context.Context, req *pb.FileUploadReq
 				continue
 			}
 
-			if strings.TrimSpace(row[4]) == "" {
+			if strings.TrimSpace(row[headerIndex["pendingprice"]]) == "" {
 				continue
 			}
 
-			// name := row[0]
-			// pendingPrice := row[12]
-			// phone := row[3]
-			// course := row[2]
-			// email := row[5]
-
-			// if strings.TrimSpace(pendingPrice) != "" {
-			// 	if contains(md["x-send-using"], "email") && (contains(md["x-send-using"], "Bulksms") || contains(md["x-send-using"], "EBulksms")) {
-			// 		if contains(md["x-send-using"], "EBulksms") {
-			// 			MMth = "EBulksms"
-			// 		} else {
-			// 			MMth = "Bulksms"
-			// 		}
-			// 		_, err := config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email, "email", Id)
-
-			// 		if err != nil {
-			// 			return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
-			// 		}
-
-			// 		_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, MMth, "sms", SmsId)
-
-			// 		if err != nil {
-			// 			return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
-			// 		}
-
-			// 		Message = "email and sms sent"
-			// 	} else {
-			// 		for _, method := range md["x-send-using"] {
-			// 			if method != "email" && method != "Bulksms" && method != "EBulksms" {
-			// 				return nil, status.Errorf(codes.InvalidArgument, "invalid argument")
-			// 			}
-
-			// 			messageMethod = method
-			// 		}
-
-			// 		if messageMethod == "email" {
-			// 			_, err = config.BulkEmail(name, pendingPrice, course, data, email, Admin.Phone, Admin.Email, messageMethod, Id)
-
-			// 			if err != nil {
-			// 				return nil, status.Errorf(codes.Unknown, "unable to complete bulk email")
-			// 			}
-
-			// 			Message = "email sent"
-			// 		}
-
-			// 		if messageMethod == "Bulksms" {
-			// 			_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod, "sms", SmsId)
-
-			// 			if err != nil {
-			// 				return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
-			// 			}
-
-			// 			Message = "sms sent"
-			// 		}
-
-			// 		if messageMethod == "EBulksms" {
-			// 			_, err = config.BulkSms(name, pendingPrice, course, data, Admin.Phone, Admin.Email, phone, messageMethod, "sms", SmsId)
-
-			// 			if err != nil {
-			// 				return nil, status.Errorf(codes.Unknown, "unable to complete sms email")
-			// 			}
-
-			// 			Message = "sms sent"
-			// 		}
-			// 	}
-			//}
-
 			job := structures.MessageJob{
-				Name:         row[0],
-				PendingPrice: row[1],
-				Course:       row[3],
-				Phone:        row[2],
-				Email:        row[4],
+				Name:         row[headerIndex["name"]],
+				PendingPrice: row[headerIndex["pendingprice"]],
+				Course:       row[headerIndex["course"]],
+				Phone:        row[headerIndex["phone"]],
+				Email:        row[headerIndex["email"]],
 				Data:         data,
 				Method:       md["x-send-using"],
-				EmailId:      Id,
-				SmsId:        SmsId,
-				Admin:        Admin,
+				EmailId:      int(EmailId),
+				SmsId:        int(SmsId),
+				//Admin:        Admin,
 			}
 
 			jobs <- job

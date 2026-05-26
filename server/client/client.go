@@ -23,7 +23,6 @@ func main() {
 
 	md := metadata.Pairs(
 		"x-send-using", "email",
-		"x-email-id", "1",
 	)
 	ctx = metadata.NewOutgoingContext(ctx, md)
 	fileContent, err := os.ReadFile("bulk_messaging_template.xlsx")
