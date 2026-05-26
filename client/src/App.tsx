@@ -17,18 +17,19 @@ function App() {
   return (
 
     <BrowserRouter>
+    <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_KEY}>
       <AuthContextProvider>
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         <Routes>
           <Route path="/auth/*" element={
             <>
-              <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_KEY}>
+              
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/verify" element={<OTPVerify />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </GoogleReCaptchaProvider>
+              
             </>
           } />
           <Route path="/*" element={
@@ -45,6 +46,7 @@ function App() {
         </Routes>
         <Footer/>
       </AuthContextProvider>
+      </GoogleReCaptchaProvider>
     </BrowserRouter>
   )
 }

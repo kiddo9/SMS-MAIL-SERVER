@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom"
+import { useAuthContext } from "../contexts/AuthContext";
 
 
 const NavBar = () => {
+  const {logout} = useAuthContext();
   return (
     <nav className='bg-white shadow-2xs sticky top-0 z-30'>
         <div className="flex justify-between items-center py-1 px-10">
@@ -15,7 +17,7 @@ const NavBar = () => {
           <div className="flex items-center">
             <Link to="/templates" className="text-[#6699ff] hover:text-blue-800 mr-4">Templates</Link>
             <Link to="/balances" className="text-[#6699ff] hover:text-blue-800 mr-4">Balances</Link>
-            <Link to="#contact" className="text-[#6699ff] hover:text-blue-800">Contact</Link>
+            <Link onClick={() => logout()} to="#" className="text-[#6699ff] hover:text-blue-800">Logout</Link>
           </div>
         </div>
       </nav>

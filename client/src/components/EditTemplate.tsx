@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 import TemplateClient from '../lib/templateClient';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useAuthContext } from '../contexts/AuthContext';
 
 const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEdit: React.Dispatch<React.SetStateAction<boolean>>, type: 'sms' | 'email' | undefined, setReload: React.Dispatch<React.SetStateAction<boolean>>}) => {
     const [loader, setLoader] = useState(false)
     const [name, setName] = useState('')
     const [text, setText] = useState('')
+
+    const {executeRecaptcha} = useGoogleReCaptcha();
+    const {atk, setAtkFunc, logout} = useAuthContext();
 
     
 
@@ -13,6 +18,13 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
         setLoader(true)
         e.preventDefault();
         {/*CREATE API GOES HERE */}
+
+        if (!executeRecaptcha) {
+            toast.error("Execute recaptcha not yet available");
+            return;
+        }
+
+        const token = await executeRecaptcha('edit');
         switch (type) {
             case "email":
                 try {
@@ -23,10 +35,16 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
                             templateName: name,
                             id
                         }
+                    }, {
+                        meta: {
+                            'x-auth-token': atk,
+                            'x-recaptcha-token': token
+                        }
                     })
                     const response = request.response;
                     if(response.status == true){
                         toast.success(response.message);
+                        setAtkFunc(request.requestHeaders['x-auth-token'] as string);
                         setOpenEdit(false);
                         setReload(true);
                         return
@@ -34,6 +52,9 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
                     toast.error(response.message);
                 } catch (error) {
                     toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+                    if(error instanceof Error && error.message=="unkown user"){
+                        logout();
+                    }
                     if(import.meta.env.VITE_ENV === "development") console.error(error);
                     
                 }finally{
@@ -49,10 +70,16 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
                             smsTemplateName: name,
                             id
                         }
+                    }, {
+                        meta: {
+                            'x-auth-token': atk,
+                            'x-recaptcha-token': token
+                        }
                     })
                     const response = request.response;
                     if(response.status == true){
                         toast.success(response.message);
+                        setAtkFunc(request.requestHeaders['x-auth-token'] as string);
                         setOpenEdit(false);
                         setReload(true);
                         return
@@ -60,6 +87,9 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
                     toast.error(response.message);
                 } catch (error) {
                     toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+                    if(error instanceof Error && error.message=="unkown user"){
+                        logout();
+                    }
                     if(import.meta.env.VITE_ENV === "development") console.error(error);
                     
                 }finally{
@@ -76,11 +106,22 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
 
     useEffect(() => {
         const getTemplate = async () => {
+            if (!executeRecaptcha) {
+                toast.error("Execute recaptcha not yet available");
+                return;
+            }
+    
+            const token = await executeRecaptcha('edit');
             switch (type) {
                 case "email":
                     try {
                         const request = await TemplateClient.getEmailTemplateById({
                             id
+                        },{
+                            meta: {
+                                'x-auth-token': atk,
+                                'x-recaptcha-token': token
+                            }
                         })
                         const response = request.response;
                         if(response.template){
@@ -99,6 +140,11 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
                     try {    
                         const request = await TemplateClient.getSmsTemplateById({
                             id
+                        }, {
+                            meta: {
+                                'x-auth-token': atk,
+                                'x-recaptcha-token': token
+                            }
                         })
                         const response = request.response;
                         if(response.smsTemplate){
@@ -120,7 +166,7 @@ const EditTemplate = ({id, setOpenEdit, type, setReload}: {id: string, setOpenEd
             }
         }
         getTemplate()
-    }, [id, type])
+    }, [id, type, executeRecaptcha, atk])
     
   return (
     <div   className='absolute top-0 left-0 flex justify-center items-center backdrop-blur-xs w-full h-full z-50 '>

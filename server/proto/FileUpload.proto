@@ -7,14 +7,14 @@ option go_package = "message/proto";
 message fileUploadRequest {
     bytes Content = 1;
     string Date = 2;
+    int64 EmailId = 3;
+    int64 SmsId = 4;
 }
-
 
 message fileUploadResponse {
     bool Status = 1;
     string Message = 2;
 }
-
 
 service fileUploadServices {
     rpc FileUpload(fileUploadRequest) returns (fileUploadResponse){}

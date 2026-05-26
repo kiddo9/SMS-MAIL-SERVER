@@ -5,10 +5,9 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
-
-
-var returnResponse map[string]interface{}
 
 var jwtSecretKey string = os.Getenv("JWT_SECRET_KEY")
 
@@ -21,7 +20,8 @@ func ValidateToken(Token string) (*jwt.Token, error) {
 		// This is a security check to ensure the token was signed with the expected method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC);!ok{
 			// If the signing method is not HMAC, return an error
-			return nil, fmt.Errorf("error occoured")
+			fmt.Println(ok)
+			return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("unexpected signing method: %v", token.Header["alg"]))
 		}
 		// Return the secret key used to sign the token
 		return []byte(jwtSecretKey), nil	

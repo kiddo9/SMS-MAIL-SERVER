@@ -21,7 +21,6 @@ func RecaptchaMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryS
 	}
 
 	recaptchaToken := md.Get("x-recaptcha-token")
-	fmt.Println(recaptchaToken, recaptchaToken[0])
 	
 	if len(recaptchaToken) == 0 || recaptchaToken[0] == "" {
 		return nil, status.Errorf(codes.Unauthenticated, "Invalid arguments")
@@ -57,5 +56,6 @@ func RecaptchaMiddleware(ctx context.Context, req interface{}, info *grpc.UnaryS
 		return nil, status.Errorf(codes.Unauthenticated, "unauthorized request",)
 	}
 
+	fmt.Println("Recaptcha validation successful")
 	return handler(ctx, req)
 }

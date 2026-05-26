@@ -31,7 +31,7 @@ func GenerateJWTTokenLongTerm(email string, uuid string, APIKey string) (string,
 		"email":   email,
 		"uuid":    uuid,
 		"APIKey":  APIKey,
-		"exp": time.Now().Add(time.Hour *8760).Unix(), // token expires after 1 year
+		"exp": time.Now().Add(time.Hour * 8760).Unix(), // token expires after 1 year 8760
 		"iat": time.Now().Unix(), // issued at time
 	}
 

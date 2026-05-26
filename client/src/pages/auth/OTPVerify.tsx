@@ -3,8 +3,11 @@ import AdminClient from "../../lib/adminClient"
 import {OtpRequest, OtpVerificationRequest} from "../../proto/Admin"
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { toast } from "react-toastify";
 
 const OTPVerify = () => {
+    const { executeRecaptcha } = useGoogleReCaptcha();
     const [otp, setOtp] = useState('');
     const [allowReset, setAllowReset] = useState(false);
     const [email, setEmail] = useState('');
@@ -19,17 +22,39 @@ const OTPVerify = () => {
     
     useEffect(() => {
         if(!tk) return
-        AdminClient.validateToken({token: tk}).then((response) => {
-            if(!response || !response.response.isValid) return
-            setEmail(response.response.email);
-        })
-    }, [tk])
+        const validateToken = async() => {
+            if (!executeRecaptcha) {
+                toast.error("Execute recaptcha not yet available");
+                return;
+            }
+
+            const token = await executeRecaptcha('validate');
+            try {
+                const response = await AdminClient.validateToken({token: tk}, {
+                    meta: {"x-recaptcha-token": token}
+                });
+                if(!response || !response.response.isValid) return
+                setEmail(response.response.email);
+            } catch (error) {
+                if(import.meta.env.VITE_ENV === "development") console.log(error);
+            }
+        }
+
+        validateToken();
+    }, [tk, executeRecaptcha])
     // const [password, setPassword] = useState('');
     const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
         try {
             e.preventDefault();
+            if (!executeRecaptcha) {
+                toast.error("Execute recaptcha not yet available");
+                return;
+            }
 
-            const response = await AdminClient.verifyOtp(OtpVerificationRequest.create({email: email, otp: otp}),{})
+            const token = await executeRecaptcha('verify');
+            const response = await AdminClient.verifyOtp(OtpVerificationRequest.create({email: email, otp: otp}),{
+                meta: {"x-recaptcha-token": token}
+            })
 
             if(!response || !response.response.isVerified){
                 setError("Failed Verification");
@@ -52,9 +77,17 @@ const OTPVerify = () => {
     }
 
     const handleOTPResend = async() =>{
+        if (!executeRecaptcha) {
+            toast.error("Execute recaptcha not yet available");
+            return;
+        }
+
+        const token = await executeRecaptcha('verify');
         try {
             setAllowReset(false);
-            const request = await AdminClient.sendOtp(OtpRequest.create({email: email}),{})
+            const request = await AdminClient.sendOtp(OtpRequest.create({email: email}),{
+                meta: {"x-recaptcha-token": token}
+            })
 
             if(!request || !request.response.message){
                 setError("Failed to resend OTP");

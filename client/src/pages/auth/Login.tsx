@@ -3,6 +3,7 @@ import AdminClient from "../../lib/adminClient";
 import { OtpRequest } from "../../proto/Admin";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,7 +17,7 @@ const Login = () => {
       e.preventDefault();
       setLoading(true);
       if (!executeRecaptcha) {
-        console.log("Execute recaptcha not yet available");
+        toast.error("Execute recaptcha not yet available");
         return;
       }
 
@@ -25,7 +26,7 @@ const Login = () => {
       const request = await AdminClient.loginAdmin(
         OtpRequest.create({ email: email }),
         {
-          meta: {"x-recaptcha-token": token},
+          meta: { "x-recaptcha-token": token },
         }
       );
 
@@ -37,6 +38,8 @@ const Login = () => {
       nav(`/auth/verify?tk=${request.response.message}`);
     } catch (error) {
       if (import.meta.env.VITE_ENV === "development") console.log(error);
+      console.log(error);
+
       setError("Failed to login");
     } finally {
       setLoading(false);
